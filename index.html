@@ -125,6 +125,14 @@ th{color:var(--muted);font-weight:600;font-size:12px}
 @media (max-width:700px){main{padding:16px}header{padding:16px}.board{grid-template-columns:repeat(4,240px)}
 .g-grid{grid-template-columns:120px repeat(var(--weeks),40px)!important;min-width:0}
 .g-label{font-size:12px}.g-hint{display:block}}
+
+.ipd-flow{display:flex;gap:6px;align-items:stretch;min-width:900px;padding:8px 0}
+.ipd-ph{flex:1;background:var(--brand-soft);border-radius:8px;padding:10px;font-size:12px;position:relative}
+.ipd-ph b{display:block;font-size:14px;color:var(--brand)}
+.ipd-ph .dcp{display:inline-block;margin-top:6px;background:var(--warn);color:#fff;padding:1px 8px;border-radius:10px;font-size:11px}
+.ipd-ph .sp{color:var(--muted);display:block;margin-top:4px}
+.ipd-res{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;background:var(--warn)}
+.ipd-res.ok{background:var(--done)}
 </style>
 </head>
 <body>
@@ -140,6 +148,7 @@ th{color:var(--muted);font-weight:600;font-size:12px}
   <button data-tab="risk">风险与依赖</button>
   <button data-tab="board">Jira 看板与燃尽图（示范）</button>
   <button data-tab="ai">AI 辅助工作流</button>
+  <button data-tab="ipd">IPD × Scrum</button>
 </nav>
 <main>
 
@@ -254,6 +263,48 @@ th{color:var(--muted);font-weight:600;font-size:12px}
   <div class="card">
     <h2>人工把关</h2>
     <ul class="gate" id="aiGate"></ul>
+  </div>
+</section>
+
+<section id="ipd">
+  <div class="card">
+    <h2>IPD 阶段 × Sprint 对应（IPD 管阶段决策，Scrum 管迭代执行）</h2>
+    <div class="ipd-flow">
+      <div class="ipd-ph"><b>① 概念</b>市场与可行性<span class="sp">Sprint 0 前</span><span class="dcp">CDCP 立项</span></div>
+      <div class="ipd-ph"><b>② 计划</b>路线图、人力、风险<span class="sp">Sprint 0 · 01-04~01-08</span><span class="dcp">PDCP 计划</span></div>
+      <div class="ipd-ph"><b>③ 开发</b>Scrum 双周迭代<span class="sp">S1~S5 · 01-11~03-19</span><span class="dcp">TR 技术评审</span></div>
+      <div class="ipd-ph"><b>④ 验证</b>回归、压测、安全、GLI-19<span class="sp">上线前测试 · 03-22~03-26</span><span class="dcp">TR5</span></div>
+      <div class="ipd-ph"><b>⑤ 发布</b>上线决策<span class="sp">★ MVP · 03-29</span><span class="dcp">ADCP 上市</span></div>
+      <div class="ipd-ph"><b>⑥ 生命周期</b>持续迭代<span class="sp">迭代 1~5 · 03-29~06-04</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>决策点检查表与模拟纪录</h2>
+    <table>
+      <thead><tr><th>决策点</th><th>评审重点</th><th>参与者</th><th>通过条件</th><th>模拟结果</th></tr></thead>
+      <tbody>
+        <tr><td><b>CDCP</b><br>立项</td><td>商户需求、竞品、技术可行性、合规风险</td><td>业务负责人、PM、技术负责人</td><td>需求明确、可复用既有棋牌底座、合规路径可行</td><td><span class="ipd-res ok">通过</span><br>既有包网商户要求增加德州扑克；竞品多为 App，WAP 免下载可做差异化</td></tr>
+        <tr><td><b>PDCP</b><br>计划</td><td>路线图、人力、关键依赖、风险矩阵</td><td>PM、各职能负责人、财务</td><td>MVP 范围冻结、关键风险有应对</td><td><span class="ipd-res">有条件通过</span><br>支付通道尚未签约。条件：同时洽谈两家以上通道，先以沙箱联调，签约状态于每次 Sprint 评审追踪</td></tr>
+        <tr><td><b>TR</b><br>技术评审</td><td>架构、接口、数据一致性、性能</td><td>技术负责人、BE、GS、QA</td><td>核心流程跑通、无阻断缺陷</td><td><span class="ipd-res">发现问题</span><br>S3 评审发现抽水结算与钱包流水对账不平。处置：增加流水对账与每日自动核对，修复列为下个 Sprint 最高优先级，复审通过后才进入验证</td></tr>
+        <tr><td><b>TR5</b><br>验证</td><td>回归、压测、安全、GLI-19 送测</td><td>QA、OPS、PM</td><td>P0 / P1 缺陷清零、压测达标</td><td><span class="ipd-res ok">通过</span><br>高风险缺陷全部修复；剩余低风险缺陷登记列表</td></tr>
+        <tr><td><b>ADCP</b><br>上市</td><td>质量、回滚方案、运营与客服准备</td><td>业务负责人、PM、OPS、客服</td><td>无高风险缺陷、回滚方案就绪</td><td><span class="ipd-res">带已知问题上线</span><br>低风险缺陷移入迭代 1，并告知客服；03-29 如期上线</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>IPD 与 Scrum 分工</h2>
+    <table>
+      <thead><tr><th>面向</th><th>IPD（阶段层）</th><th>Scrum（执行层）</th></tr></thead>
+      <tbody>
+        <tr><td>管什么</td><td>做不做、何时进下一阶段</td><td>这两周怎么做完</td></tr>
+        <tr><td>节奏</td><td>阶段末的决策评审</td><td>双周 Sprint</td></tr>
+        <tr><td>决策者</td><td>评审委员会（业务、技术、财务）</td><td>PO 定优先级，团队自组织</td></tr>
+        <tr><td>产出</td><td>评审结论、条件与行动项</td><td>可交付增量、燃尽图</td></tr>
+        <tr><td>衔接方式</td><td colspan="2">评审的条件与行动项转成 Backlog 项目，排进下一个 Sprint；Sprint 评审的结果作为下一次决策评审的输入</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
