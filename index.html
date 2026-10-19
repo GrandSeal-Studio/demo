@@ -137,8 +137,8 @@ th{color:var(--muted);font-weight:600;font-size:12px}
 </head>
 <body>
 <header>
-  <h1>德州扑克 WAP · 开发计划</h1>
-  <p>Scrum 两周一个迭代 · MVP 12 周上线</p>
+  <h1>德州扑克 WAP 开发计划</h1>
+  <p>采用 Scrum 两周一个迭代，MVP 预计 12 周上线</p>
 </header>
 <nav id="tabs">
   <button data-tab="plan" class="active">路线图</button>
@@ -235,7 +235,7 @@ th{color:var(--muted);font-weight:600;font-size:12px}
   <div class="board" id="boardCols"></div>
   </div>
   <div class="card">
-    <h2>燃尽图（示范）· <span id="burnTitle"></span></h2>
+    <h2>燃尽图（示范）：<span id="burnTitle"></span></h2>
     <svg class="chart" id="burnChart" viewBox="0 0 700 300"></svg>
     <div class="legend"><span><i style="background:var(--todo)"></i>理想线</span><span><i style="background:var(--brand)"></i>剩余点数</span></div>
   </div>
@@ -271,11 +271,11 @@ th{color:var(--muted);font-weight:600;font-size:12px}
     <h2>IPD 阶段 × Sprint 对应（IPD 管阶段决策，Scrum 管迭代执行）</h2>
     <div class="ipd-flow">
       <div class="ipd-ph"><b>① 概念</b>市场与可行性<span class="sp">Sprint 0 前</span><span class="dcp">CDCP 立项</span></div>
-      <div class="ipd-ph"><b>② 计划</b>路线图、人力、风险<span class="sp">Sprint 0 · 01-04~01-08</span><span class="dcp">PDCP 计划</span></div>
-      <div class="ipd-ph"><b>③ 开发</b>Scrum 双周迭代<span class="sp">S1~S5 · 01-11~03-19</span><span class="dcp">TR 技术评审</span></div>
-      <div class="ipd-ph"><b>④ 验证</b>回归、压测、安全、GLI-19<span class="sp">上线前测试 · 03-22~03-26</span><span class="dcp">TR5</span></div>
-      <div class="ipd-ph"><b>⑤ 发布</b>上线决策<span class="sp">★ MVP · 03-29</span><span class="dcp">ADCP 上市</span></div>
-      <div class="ipd-ph"><b>⑥ 生命周期</b>持续迭代<span class="sp">迭代 1~5 · 03-29~06-04</span></div>
+      <div class="ipd-ph"><b>② 计划</b>路线图、人力、风险<span class="sp">Sprint 0，01-04~01-08</span><span class="dcp">PDCP 计划</span></div>
+      <div class="ipd-ph"><b>③ 开发</b>Scrum 双周迭代<span class="sp">S1~S5，01-11~03-19</span><span class="dcp">TR 技术评审</span></div>
+      <div class="ipd-ph"><b>④ 验证</b>回归、压测、安全、GLI-19<span class="sp">上线前测试，03-22~03-26</span><span class="dcp">TR5</span></div>
+      <div class="ipd-ph"><b>⑤ 发布</b>上线决策<span class="sp">MVP 上线，03-29</span><span class="dcp">ADCP 上市</span></div>
+      <div class="ipd-ph"><b>⑥ 生命周期</b>持续迭代<span class="sp">迭代 1~5，03-29~06-04</span></div>
     </div>
   </div>
 
@@ -546,7 +546,7 @@ const DEPT = {PM:'产品',UI:'UI 设计',FE:'前端',BE:'后端',GS:'牌局服�
     ['2021-01-08','Sprint 0 完成','架构、设计规范、环境就绪'],
     ['2021-02-05','钱包与牌局服务核心完成','可以充值，NLH 引擎可运行'],
     ['2021-03-19','MVP 功能完成','进入上线前测试'],
-    ['2021-03-29','★ MVP 上线','账号、钱包、新人局、官方现金桌 NLH、官方 MTT / SNG、总后台基础、风控基础'],
+    ['2021-03-29','MVP 上线','账号、钱包、新人局、官方现金桌 NLH、官方 MTT / SNG、总后台基础、风控基础'],
     ['2021-04-09','迭代 1 上线','俱乐部、私人桌、分成、代理后台'],
     ['2021-04-23','迭代 2 上线','PLO4 / PLO5 / 短牌 / AoF、Jackpot、兑现、多次发牌'],
     ['2021-05-07','迭代 3 上线','商城、VIP、通行密钥、第三方登录'],
@@ -565,8 +565,8 @@ const DEPT = {PM:'产品',UI:'UI 设计',FE:'前端',BE:'后端',GS:'牌局服�
     const list = ISSUES.filter(i=>(!fs.value||i.sprint===fs.value)&&(!fe.value||i.epic===fe.value)&&(!fr.value||i.role===fr.value));
     document.getElementById('boardCols').innerHTML = STATUS.map(([st,name])=>{
       const items = list.filter(i=>i.status===st);
-      return `<div class="col"><h3><span>${name}</span><span>${items.length} · ${sum(items.map(i=>i.pts))} 点</span></h3>${
-        items.map(i=>`<div class="issue" data-key="${i.key}"><div class="k">${i.key} · ${EPICS[i.epic]}</div><div class="t">${i.title}</div><div class="m"><span class="role r-${i.role}">${i.role}</span><span class="pt">${i.pts}</span></div></div>`).join('')
+      return `<div class="col"><h3><span>${name}</span><span>${items.length} 张，${sum(items.map(i=>i.pts))} 点</span></h3>${
+        items.map(i=>`<div class="issue" data-key="${i.key}"><div class="k">${i.key}  ${EPICS[i.epic]}</div><div class="t">${i.title}</div><div class="m"><span class="role r-${i.role}">${i.role}</span><span class="pt">${i.pts}</span></div></div>`).join('')
       }</div>`;
     }).join('');
     document.querySelectorAll('.issue').forEach(el=>el.onclick=()=>openIssue(el.dataset.key));
@@ -579,7 +579,7 @@ function openIssue(key){
   const i = ISSUES.find(x=>x.key===key);
   const s = SPRINTS.find(x=>x.id===i.sprint);
   document.getElementById('modalBox').innerHTML = `<button class="close" onclick="closeModal()">×</button>
-    <div class="k" style="color:var(--muted)">${i.key} · Story</div><h3>${i.title}</h3>
+    <div class="k" style="color:var(--muted)">${i.key}  Story</div><h3>${i.title}</h3>
     <dl>
       <dt>Epic</dt><dd>${EPICS[i.epic]}</dd>
       <dt>迭代</dt><dd>${s.name}（${s.start} – ${s.end}）</dd>
@@ -588,7 +588,7 @@ function openIssue(key){
       <dt>故事点</dt><dd>${i.pts}</dd>
       <dt>需求依据</dt><dd>${i.ref||'—'}</dd>
     </dl>
-    <h4 style="margin:14px 0 4px">验收场景<span class="ai-badge">Claude 产出 · 待 QA 审核</span></h4>
+    <h4 style="margin:14px 0 4px">验收场景<span class="ai-badge">Claude 产出，待 QA 审核</span></h4>
     ${GHERKIN[i.key]?`<div class="code"><button class="copy" onclick="copyText(this)">复制</button><span>${hlGherkin(GHERKIN[i.key])}</span></div>`:'<div style="color:var(--muted);font-size:12px">尚未产出</div>'}`;
   document.getElementById('modal').classList.add('open');
 }
@@ -693,9 +693,9 @@ document.getElementById('depBody').innerHTML = DEPS.map(r=>`<tr><td>${r[0]}</td>
     const body = SPRINTS.map(sp=>{
       const its = list.filter(i=>i.sprint===sp.id);
       if(!its.length) return '';
-      return `<h4>${sp.name}（${sp.start} – ${sp.end}）</h4><ul>${its.map(i=>`<li>${i.title}<span class="ref">${unitName[i.epic]}${i.ref?' · '+i.ref:''}</span></li>`).join('')}</ul>`;
+      return `<h4>${sp.name}（${sp.start} – ${sp.end}）</h4><ul>${its.map(i=>`<li>${i.title}<span class="ref">${unitName[i.epic]}${i.ref?'，'+i.ref:''}</span></li>`).join('')}</ul>`;
     }).join('');
-    return `<div class="d-row" data-r="${r}"><span class="role r-${r}">${DEPT[r]}</span><small>${list.length} 张单 · ${pts} 点</small></div><div class="d-body" id="db-${r}">${body}</div>`;
+    return `<div class="d-row" data-r="${r}"><span class="role r-${r}">${DEPT[r]}</span><small>${list.length} 张单，${pts} 点</small></div><div class="d-body" id="db-${r}">${body}</div>`;
   }).join('');
   el.querySelectorAll('.d-row').forEach(row=>row.onclick=()=>{
     row.classList.toggle('open');
