@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head><script>window.__DZ_IMG={};(function(){var M=window.__DZ_IMG||{};
 function f(u){if(typeof u!=='string')return u;var k=u.replace(/^\.\//,'');return M[k]||u;}
-function c(t){return (typeof t==='string'&&t.indexOf('img/')>-1)?t.replace(/url\((['"]?)(?:\.\/)?(img\/[^'")]+)\1\)/g,function(m,q,p){return M[p]?'url("'+M[p]+'")':m;}):t;}
+function c(t){return (typeof t==='string'&&t.indexOf('img/')>-1)?t.replace(/url\((['"]?)(?:\.\/)?(img\/[^'")]+)\1\)/g,function(m,q,p){return M[p]?'url('+M[p]+')':m;}):t;}
 function h(t){return (typeof t==='string'&&t.indexOf('img/')>-1)?c(t.replace(/(\s(?:src|href|poster)=)(["'])(?:\.\/)?(img\/[^"']+)\2/g,function(m,a,q,p){return M[p]?a+q+M[p]+q:m;})):t;}
 window.__dzImg=f;
 function acc(P,n,w){var d=Object.getOwnPropertyDescriptor(P,n);if(d&&d.set)Object.defineProperty(P,n,{get:d.get,set:function(v){d.set.call(this,w(v));},configurable:true});}
