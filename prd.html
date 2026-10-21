@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script>window.__DZ_IMG={};(function(){var M=window.__DZ_IMG||{};
+function f(u){if(typeof u!=='string')return u;var k=u.replace(/^\.\//,'');return M[k]||u;}
+function c(t){return (typeof t==='string'&&t.indexOf('img/')>-1)?t.replace(/url\((['"]?)(?:\.\/)?(img\/[^'")]+)\1\)/g,function(m,q,p){return M[p]?'url("'+M[p]+'")':m;}):t;}
+function h(t){return (typeof t==='string'&&t.indexOf('img/')>-1)?c(t.replace(/(\s(?:src|href|poster)=)(["'])(?:\.\/)?(img\/[^"']+)\2/g,function(m,a,q,p){return M[p]?a+q+M[p]+q:m;})):t;}
+window.__dzImg=f;
+function acc(P,n,w){var d=Object.getOwnPropertyDescriptor(P,n);if(d&&d.set)Object.defineProperty(P,n,{get:d.get,set:function(v){d.set.call(this,w(v));},configurable:true});}
+acc(HTMLImageElement.prototype,'src',f);acc(Element.prototype,'innerHTML',h);acc(Element.prototype,'outerHTML',h);
+['backgroundImage','background','cssText','content','maskImage','webkitMaskImage','listStyleImage','borderImage'].forEach(function(n){acc(CSSStyleDeclaration.prototype,n,c);});
+var sp=CSSStyleDeclaration.prototype.setProperty;CSSStyleDeclaration.prototype.setProperty=function(n,v,p){return sp.call(this,n,c(v),p);};
+var ia=Element.prototype.insertAdjacentHTML;Element.prototype.insertAdjacentHTML=function(p,t){return ia.call(this,p,h(t));};
+var sa=Element.prototype.setAttribute;Element.prototype.setAttribute=function(n,v){if(n==='src'||n==='href'||n==='poster')v=f(v);else if(n==='style')v=c(v);return sa.call(this,n,v);};
+function fix(el){if(!el||el.nodeType!==1)return;var s=el.getAttribute('src');if(s&&s.indexOf('img/')>-1){var n=f(s);if(n!==s)sa.call(el,'src',n);}
+var st=el.getAttribute('style');if(st&&st.indexOf('img/')>-1){var ns=c(st);if(ns!==st)sa.call(el,'style',ns);}
+if(el.tagName==='STYLE'&&el.textContent.indexOf('img/')>-1)el.textContent=c(el.textContent);}
+function walk(r){if(!r||r.nodeType!==1)return;fix(r);var L=r.querySelectorAll('[src*="img/"],[style*="img/"],style');for(var i=0;i<L.length;i++)fix(L[i]);}
+new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes')fix(m.target);else for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];if(n.nodeType===1)walk(n);else if(n.nodeType===3&&n.parentNode&&n.parentNode.tagName==='STYLE')fix(n.parentNode);}}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style']});
+})();</script>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob:; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' blob: data:; object-src 'none'; base-uri 'self'">
+<script>/* guard.js · 演示版防护（R4-SEC-01 / R4-SEC-02，CLAUDE.md §10）
+   - 只做低风险、不破坏功能的部分；依 §10.2 不加 debugger 陷阱、不做视口检测清屏；F12 / Ctrl+Shift+I 等快捷键只 preventDefault（依 §10.1），浏览器选单仍可开开发者工具。
+   - 不用 MutationObserver 删除“非本站节点”：误删 Toast / 弹层 / 第三方 QR 节点的风险高；彻底隔绝扩充须 PWA / Tauri 交付形态（§10.4）。
+   - 在 <head> 最早载入；所有 wap / web / admin / dealer / agent / index / prd 共用。 */
+(function(){
+  'use strict';
+  if (window.__dzGuard) return; window.__dzGuard = 1;
+  var d = document;
+  /* 可选取、可右键的区域：输入框、可编辑区、data-allow-copy、后台 .ad-copy、三套后台登录页示范账号卡 .ad-acct（R5-ADM-09，仅此一处）、带“复制”按钮的地址 / 账号 / 邀请链接行 */
+  var ALLOW = 'input,textarea,select,[contenteditable]:not([contenteditable=false]),[data-allow-copy],.ad-copy,.ad-acct,.w-addr,.w-cp,[data-a=cp],[data-a=copy]';
+  var ROWS = ':has(> .w-cp),:has(> [data-a=cp]),:has(> [data-a=copy]),:has(> .ad-copy)';
+
+  /* ---------- SEC-01 · CSS：全局禁选取 / 禁拖拽，白名单恢复 ---------- */
+  var css = '*{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}'
+    + 'img{-webkit-user-drag:none}'
+    + ':is(' + ALLOW + '),:is(' + ALLOW + ') *,:is(' + ROWS + '),:is(' + ROWS + ') *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}'
+    + 'img.g-art{pointer-events:none}';
+  var st = d.createElement('style'); st.id = 'dzGuardCss'; st.textContent = css;
+  (d.head || d.documentElement).appendChild(st);
+
+  function allowed(t){ try{ return !!(t && t.closest && (t.closest(ALLOW) || t.closest(ROWS))); }catch(_){ return !!(t && t.closest && t.closest(ALLOW)); } }
+
+  /* ---------- SEC-01 · 事件：右键、拖图、另存 / 原始码 / 打印快捷键 ---------- */
+  d.addEventListener('contextmenu', function(e){ if (!allowed(e.target)) e.preventDefault(); }, true);
+  d.addEventListener('dragstart', function(e){ var t = e.target; if (t && (t.tagName === 'IMG' || (t.closest && t.closest('a,img')))) e.preventDefault(); }, true);
+  /* §10.1：另存 / 原始码 / 打印（Ctrl/Cmd+S/U/P、Cmd+Option+U）＋开发者工具快捷键（F12、Ctrl+Shift+I/J/C、Cmd+Option+I/J/C）只做 preventDefault。
+     §10.2：不加 debugger 陷阱、不做视口检测清屏；浏览器选单打开开发者工具仍可用。Mac 的 Option 会改 e.key，故以 e.code 判断字母。 */
+  d.addEventListener('keydown', function(e){
+    var c = e.code || '', k = (e.key || '').toLowerCase(), L = /^Key[A-Z]$/.test(c) ? c.slice(3).toLowerCase() : k;
+    var dev = c === 'F12' || k === 'f12'
+      || (((e.ctrlKey && e.shiftKey) || (e.metaKey && e.altKey)) && (L === 'i' || L === 'j' || L === 'c'));
+    var save = (e.ctrlKey || e.metaKey) && !e.shiftKey && (L === 's' || L === 'p' || L === 'u');
+    if (dev || save) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  /* ---------- SEC-02 · 美术图：draggable=false、转 Blob URL、大图透明遮罩 ---------- */
+  var cache = {}, pending = {};
+  var canBlob = location.protocol !== 'file:' && !!(window.fetch && window.URL && URL.createObjectURL);
+  var EDIT = '#caImg,#avcI,[data-pick],[data-x],[data-f]';        /* 裁剪 / 选图用的 img 保持可点 */
+  function isArt(src){ return /^(\.\/)?img\//.test(src || ''); }
+  function shield(img){
+    /* 大图（Banner、荷官、3D 主图、头像大图）：img 本身不接收指针，右键 / 长按落到外层（已拦截），等同透明遮罩 */
+    try{ if (img.matches(EDIT)) return; var w = img.width || parseInt(img.style.width, 10) || 0;
+      /* R4-SEC-02：file:// 无法转 Blob，所有本站美术图一律加透明遮罩（右键 / 长按 / 拖曳落到外层被拦），减少明文路径外泄 */
+      if ((!canBlob && isArt(img.getAttribute('src'))) || w >= 120 || /banner|focus|dealer|loader|hero/.test(img.getAttribute('src') || '') || /ac-hero/.test(img.className)) img.classList.add('g-art');
+    }catch(_){}
+  }
+  function swap(img){
+    var src = img.getAttribute('src');
+    if (!isArt(src)) return;
+    if (cache[src]) { img.setAttribute('src', cache[src]); return; }
+    if (pending[src]) { pending[src].push(img); return; }
+    pending[src] = [img];
+    fetch(src).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){
+      var u = URL.createObjectURL(b); cache[src] = u;
+      pending[src].forEach(function(el){ if (el.getAttribute('src') === src) el.setAttribute('src', u); });
+    }).catch(function(){ /* 失败（如 file://）保持原路径，图片不消失 */ }).then(function(){ delete pending[src]; });
+  }
+  function prep(img){
+    if (img.__dzg !== img.getAttribute('src')) {
+      img.draggable = false;
+      shield(img);
+      if (canBlob) swap(img);
+      img.__dzg = img.getAttribute('src');
+    }
+  }
+  function scan(root){
+    if (!root || root.nodeType !== 1) return;
+    if (root.tagName === 'IMG') prep(root);
+    var list = root.getElementsByTagName ? root.getElementsByTagName('img') : [];
+    for (var i = 0; i < list.length; i++) prep(list[i]);
+  }
+  /* 只“改写”本站 img 的属性，不删除任何节点 */
+  try{
+    new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (m.type === 'attributes') { if (m.target.tagName === 'IMG') prep(m.target); }
+        else for (var j = 0; j < m.addedNodes.length; j++) scan(m.addedNodes[j]);
+      }
+    }).observe(d.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+  }catch(_){}
+  d.addEventListener('DOMContentLoaded', function(){ scan(d.body); });
+  window.addEventListener('load', function(){ var l = d.images; for (var i = 0; i < l.length; i++) shield(l[i]); });
+})();
+
+</script>
+<script>try{localStorage.setItem('dz_demo_pc','1')}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>德州扑克 PRD 文档中心</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>/* 视觉规范：PRD 01 第 9 节 */
+:root{
+  --primary:#006E52; --primary-weak:#E3F1EC; --text:#13181C; --text-2:#7A828C;
+  --bg-green:#F0F7F5; --bg-gray:#F2F5F7; --bg-card:#F5F7FA; --icon-bg:#F0F5F5;
+  --line:#D4DEDE; --nav-bg:#F7FAFB; --gold:#F59906; --gold-line:#FFD161;
+  --danger:#D93025; --warn:#F59906;
+  --stage:#E9EEF0; --panel:#FFFFFF;
+  --r-card:12px; --r-banner:16px; --r-btn:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Inter,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--stage);font-size:13px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+/* ---------- 外框：顶部模式切换 + 舞台 + 导览面板 ---------- */
+.topbar{height:52px;display:flex;align-items:center;gap:16px;padding:0 20px;background:#13181C;color:#fff}
+.topbar .brand{font-weight:600;font-size:15px}
+.topbar .seg{display:flex;background:#2A3238;border-radius:8px;padding:3px}
+.topbar .seg a{text-decoration:none}
+.topbar .seg button{padding:6px 14px;border-radius:6px;color:#C9D1D6;font-size:13px}
+.topbar .seg button.on{background:var(--primary);color:#fff}
+.topbar .sp{flex:1}
+.topbar .note{color:#9AA4AB;font-size:12px}
+.layout{display:flex;height:calc(100% - 52px)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+.panel{width:340px;background:var(--panel);border-left:1px solid #DDE3E6;display:flex;flex-direction:column;overflow:hidden}
+.panel h3{font-size:13px;margin:14px 16px 8px;color:var(--text-2);font-weight:600}
+.panel .box{margin:0 16px 8px}
+.panel .roles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.panel .roles button{padding:8px 4px;border:1px solid var(--line);border-radius:8px;font-size:12px}
+.panel .roles button.on{border-color:var(--primary);background:var(--primary-weak);color:var(--primary);font-weight:600}
+.panel .jumps{display:flex;flex-wrap:wrap;gap:6px}
+.panel .jumps button{padding:5px 9px;background:var(--bg-gray);border-radius:14px;font-size:12px}
+.panel .jumps button:hover{background:var(--primary-weak);color:var(--primary)}
+.panel .ref{background:var(--bg-green);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6}
+.panel .ref b{color:var(--primary)}
+.panel .log{flex:1;overflow:auto;margin:0 16px 12px;border:1px solid #E6EBEE;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.panel .log div{padding:5px 8px;border-bottom:1px solid #F0F3F5;display:flex;gap:6px}
+.panel .log .t{color:var(--text-2)} .panel .log .k{font-weight:600} .panel .log .F{color:#2563EB} .panel .log .S{color:var(--primary)}
+.panel .log .kv{color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel .reset{margin:0 16px 14px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:12px}
+
+/* ---------- 手机 ---------- */
+.phone{width:390px;height:844px;background:#fff;border-radius:40px;box-shadow:0 20px 60px rgba(19,24,28,.18),0 0 0 10px #13181C;position:relative;overflow:hidden;flex-shrink:0}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:#fff}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:0}
+.pad{padding:0 20px}
+
+/* 顶栏 01 第 2.3 节 */
+.hdr{height:64px;display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0;background:#fff}
+.hdr .logo{font-weight:600;font-size:24px}
+.hdr .title{font-weight:600;font-size:19px}
+.hdr .back{font-size:26px;line-height:1;width:24px}
+.hdr .sp{flex:1}
+.hdr .ico{width:36px;height:36px;border-radius:18px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:16px;position:relative}
+.hdr .ico .dot{position:absolute;top:4px;right:4px;min-width:14px;height:14px;border-radius:7px;background:var(--danger);color:#fff;font-size:9px;line-height:14px;text-align:center;padding:0 3px}
+
+/* 底部导航 01 第 2.1 节 */
+.nav{height:70px;flex-shrink:0;background:var(--nav-bg);display:flex;align-items:center;justify-content:space-between;padding:0 20px 6px;position:relative;border-top:1px solid #EDF1F2}
+.nav button{width:64px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--text-2)}
+.nav button .i{font-size:20px;line-height:26px}
+.nav button.on{color:var(--text);font-weight:600}
+.nav .bulge{position:relative;height:50px}
+.nav .bulge .w{position:absolute;left:10px;top:-17px;width:44px;height:44px;border-radius:22px;background:var(--gold);border:2px solid var(--gold-line);box-shadow:0 3px 8px rgba(173,97,0,.22);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
+.nav .bulge span.l{position:absolute;top:32px;left:0;width:64px;text-align:center}
+
+/* 通用元件 */
+.card{background:var(--bg-card);border-radius:var(--r-card);padding:14px}
+.card.g{background:var(--bg-green)}
+.card.w{background:#fff;border:1px solid #E6EBEE}
+.btn{height:44px;border-radius:22px;background:var(--primary);color:#fff;font-weight:600;font-size:14px;width:100%;display:flex;align-items:center;justify-content:center}
+.btn.sec{background:var(--bg-green);color:var(--primary)}
+.btn.dark{background:var(--text)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.btn.danger{background:var(--danger)}
+.btn.sm{height:34px;border-radius:8px;font-size:13px;width:auto;padding:0 14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:10px}
+.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mb12{margin-bottom:12px}
+.muted{color:var(--text-2)} .small{font-size:11px} .h1{font-size:19px;font-weight:600} .h2{font-size:16px;font-weight:600} .h3{font-size:14px;font-weight:600}
+.big{font-size:26px;font-weight:600}
+.green{color:var(--primary)} .red{color:var(--danger)} .gold{color:var(--gold)}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:var(--bg-gray);color:var(--text-2)}
+.tag.g{background:var(--primary-weak);color:var(--primary)} .tag.r{background:#FDECEA;color:var(--danger)} .tag.o{background:#FFF3DF;color:#B56A00}
+.pills{display:flex;gap:8px;overflow-x:auto;padding:4px 20px 10px;flex-shrink:0}
+.pills::-webkit-scrollbar{height:0}
+.pill{flex-shrink:0;min-width:64px;height:30px;padding:0 14px;border-radius:15px;background:var(--bg-gray);font-size:12px}
+.pill.on{background:var(--text);color:#fff;font-weight:600}
+.tabs{display:flex;border-bottom:1px solid #E6EBEE;margin:0 20px}
+.tabs button{flex:1;height:40px;font-size:13px;color:var(--text-2);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--text);font-weight:600;border-color:var(--primary)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--text-2)}
+.input{height:48px;border:1px solid var(--line);border-radius:var(--r-btn);padding:0 14px;background:#fff;width:100%;font-size:14px;outline:none}
+.input:focus{border-color:var(--primary)}
+.input.err{border-color:var(--danger)}
+.ferr{color:var(--danger);font-size:12px;min-height:16px}
+.list .it{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #EEF2F3}
+.list .it:last-child{border-bottom:0}
+.list .it .grow{flex:1}
+.chev{color:var(--text-2);font-size:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.qe{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px}
+.qe .b{width:44px;height:44px;border-radius:14px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:20px}
+.kv{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.kv>span:first-child{color:var(--text-2)} /* R14-QA-04：只作用于栏位名，避免值内第一张牌（如 6♥）被染灰 */
+.divider{height:1px;background:#EEF2F3;margin:8px 0}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 20px;color:var(--text-2);text-align:center}
+.empty .ill{font-size:40px}
+.banner{height:200px;border-radius:var(--r-banner);background:linear-gradient(135deg,#0B3D30,#006E52 60%,#1E8C6E);color:#fff;padding:22px;position:relative;overflow:hidden}
+.banner .k{font-size:11px;color:#BFE5D6;font-weight:600;letter-spacing:.5px}
+.banner .t{font-size:24px;font-weight:600;margin-top:8px}
+.banner .s{font-size:13px;color:#E0E5E8;margin-top:6px}
+.banner .suit{position:absolute;right:-10px;bottom:-30px;font-size:150px;opacity:.12}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--line)} .dots i.on{width:20px;background:var(--primary)}
+.marquee{height:34px;border-radius:8px;background:var(--bg-green);display:flex;align-items:center;gap:10px;padding:0 12px;font-size:12px;overflow:hidden}
+.marquee .mtxt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5}
+.check input{margin-top:3px;accent-color:var(--primary)}
+.switch{width:40px;height:24px;border-radius:12px;background:var(--line);position:relative;flex-shrink:0}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:10px;background:#fff;transition:.2s}
+.switch.on{background:var(--primary)} .switch.on::after{left:18px}
+.progress{height:6px;border-radius:3px;background:var(--bg-gray);overflow:hidden} .progress i{display:block;height:100%;background:var(--primary)}
+.skeleton{background:linear-gradient(90deg,#F2F5F7 25%,#E8EDF0 50%,#F2F5F7 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:8px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.otp{display:flex;gap:8px;justify-content:space-between}
+.otp input{width:44px;height:52px;text-align:center;font-size:20px;font-weight:600;border:1px solid var(--line);border-radius:8px}
+
+/* 浮层：Toast / 弹窗 / 底部面板 01 第 6.6、6.7 节 */
+.layer{position:absolute;inset:0;z-index:50;display:flex}
+.mask{position:absolute;inset:0;background:rgba(19,24,28,.48)}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:90;background:rgba(19,24,28,.9);color:#fff;border-radius:8px;padding:12px 16px;display:flex;gap:8px;align-items:center;max-width:300px;font-size:14px;line-height:1.4;pointer-events:none;animation:fade .2s}
+.toast .ic{font-weight:600}
+.toast .code{font-size:10px;opacity:.6;margin-left:4px}
+@keyframes fade{from{opacity:0;transform:translate(-50%,-44%)}}
+.dialog{position:relative;margin:auto 24px;background:#fff;border-radius:16px;padding:22px 20px 18px;width:100%;z-index:1;animation:pop .18s}
+.dialog .dt{font-size:17px;font-weight:600}
+.dialog .dd{margin-top:10px;color:var(--text);line-height:1.6;font-size:13px}
+.dialog .acts{display:flex;gap:10px;margin-top:18px}
+.dialog .acts .btn{height:44px}
+.dialog .code{font-size:10px;color:var(--text-2);margin-top:8px}
+@keyframes pop{from{transform:scale(.94);opacity:0}}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:20px 24px 28px;z-index:1;max-height:88%;overflow:auto;animation:up .22s}
+.sheet .st{font-size:18px;font-weight:600}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.banner-net{position:absolute;top:0;left:0;right:0;z-index:60;background:var(--danger);color:#fff;text-align:center;font-size:12px;padding:6px}
+
+/* 浮窗：最近玩 01 第 7.2 节 */
+.pip{position:absolute;right:12px;bottom:90px;z-index:40;width:150px;background:#13181C;color:#fff;border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;font-size:11px}
+.pip .x{position:absolute;top:4px;right:8px;opacity:.7}
+.pip .live{display:inline-block;width:6px;height:6px;border-radius:3px;background:#3DDC84;margin-right:4px}
+
+/* 牌桌（全屏） */
+.table-screen{background:radial-gradient(ellipse at 50% 40%,#0E5A45 0%,#073A2D 60%,#04261D 100%);color:#fff}
+.felt{position:relative;flex:1}
+.tbar{display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:12px;color:#CFE6DE}
+.tbar button{color:#fff;font-size:12px;background:rgba(255,255,255,.12);padding:6px 10px;border-radius:14px}
+.oval{position:absolute;left:30px;right:30px;top:120px;height:430px;border-radius:200px;border:6px solid #8A5A2B;background:radial-gradient(ellipse,#127356,#0A4E3B);box-shadow:inset 0 0 40px rgba(0,0,0,.4)}
+.board{position:absolute;left:50%;top:286px;transform:translateX(-50%);display:flex;gap:5px;align-items:flex-start} /* R27-UI-50／51：公共牌在底池标签下方；空牌位与已发牌同尺寸 */
+.board .cardx.empty{flex:none;padding:0;display:block}
+.pot{position:absolute;left:50%;top:248px;transform:translateX(-50%);background:rgba(0,0,0,.35);padding:4px 12px;border-radius:12px;font-size:12px;white-space:nowrap}
+.cardx{width:36px;height:50px;border-radius:5px;background:#fff;color:#13181C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:15px;line-height:1;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.cardx.r{color:#D93025}
+.cardx .s{font-size:13px}
+.cardx.back{background:repeating-linear-gradient(45deg,#1F4E8C,#1F4E8C 4px,#2C64AB 4px,#2C64AB 8px);border:2px solid #fff}
+.cardx.sm{width:28px;height:40px;font-size:12px}
+.cardx.empty{background:rgba(255,255,255,.08);box-shadow:none}
+.seat{position:absolute;width:84px;text-align:center;font-size:11px}
+.seat .av{width:46px;height:46px;border-radius:23px;margin:0 auto;background:#2B3A40;border:2px solid #4A5A60;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative}
+.seat.act .av{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,153,6,.35)}
+.seat.fold{opacity:.45}
+.seat .nm{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .st{color:#FFD161;font-weight:600}
+.seat .bet{position:absolute;font-size:11px;background:rgba(0,0,0,.45);padding:2px 7px;border-radius:9px;white-space:nowrap}
+.seat .hole{display:flex;gap:2px;justify-content:center;margin-top:2px}
+.seat .badge{position:absolute;top:-6px;right:12px;background:#fff;color:#13181C;border-radius:8px;font-size:9px;padding:1px 4px;font-weight:700}
+.seat .lastact{position:absolute;left:50%;transform:translateX(-50%);top:-18px;background:rgba(255,255,255,.9);color:#13181C;border-radius:8px;padding:1px 6px;font-size:10px;white-space:nowrap}
+.timer{height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:3px;overflow:hidden}
+.timer i{display:block;height:100%;background:var(--gold)}
+.actbar{padding:10px 14px 18px;background:rgba(0,0,0,.35);display:flex;flex-direction:column;gap:8px}
+.actbar .acts{display:flex;gap:8px}
+.actbar .acts button{flex:1;height:44px;border-radius:10px;font-weight:600;font-size:13px}
+.a-fold{background:#4A5258;color:#fff}.a-call{background:#1F7A5C;color:#fff}.a-raise{background:var(--gold);color:#13181C}.a-allin{background:var(--danger);color:#fff}
+.actbar input[type=range]{width:100%;accent-color:var(--gold)}
+.tmsg{position:absolute;left:50%;top:360px;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:6px 14px;border-radius:14px;font-size:12px;white-space:nowrap;z-index:5}
+
+/* ---------- 后台 ---------- */
+.admin{width:100%;max-width:1280px;height:100%;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(19,24,28,.1);display:flex;overflow:hidden}
+.admin .side{width:200px;background:#13181C;color:#C9D1D6;padding:16px 0;flex-shrink:0;overflow:auto}
+.admin .side .b{color:#fff;font-weight:600;padding:0 18px 14px;font-size:14px}
+.admin .side button{display:block;width:100%;text-align:left;padding:10px 18px;font-size:13px;color:#C9D1D6}
+.admin .side button.on{background:var(--primary);color:#fff}
+.admin .main{flex:1;overflow:auto;padding:24px 28px;background:#F7F9FA}
+.admin h2{font-size:18px;margin-bottom:4px}
+.admin .sub{color:var(--text-2);font-size:12px;margin-bottom:16px}
+.admin .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.admin .kpi{background:#fff;border:1px solid #E6EBEE;border-radius:10px;padding:14px}
+.admin .kpi .v{font-size:22px;font-weight:600;margin-top:4px}
+.admin table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E6EBEE;border-radius:10px;overflow:hidden;font-size:12px}
+.admin th{background:#F2F5F7;text-align:left;padding:9px 10px;font-weight:600;color:var(--text-2)}
+.admin td{padding:9px 10px;border-top:1px solid #EEF2F3;vertical-align:middle}
+.admin .pnl{background:#fff;border:1px solid #E6EBEE;border-radius:10px;padding:16px;margin-bottom:16px}
+.admin .btn.sm{height:28px;font-size:12px;padding:0 10px;border-radius:6px}
+.admin .formrow{display:flex;gap:12px;align-items:center;margin:8px 0}
+.admin .formrow label{width:140px;color:var(--text-2)}
+.admin .formrow .input{height:34px;width:200px}
+
+/* R10-QA-01：kv 两栏长英文不重叠——栏位名可换行、值右对齐可换行 */
+body.wap .kv{gap:12px;align-items:flex-start}
+body.wap .kv>span:first-child{flex:0 1 auto;min-width:min-content;max-width:50%;white-space:normal;overflow-wrap:break-word}
+body.wap .kv>:last-child{flex:0 1 auto;min-width:0;text-align:right;overflow-wrap:break-word}
+/* R10-QA-03：页签文字不换行，红点与文字同行，不压下划线 */
+body.wap .tabs button{white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;min-width:0;overflow:hidden}
+body.wap .tabs button .tag{flex-shrink:0;line-height:16px}
+/* R8-EMO-02：首页 Banner 文字限宽，避开右侧荷官与扑克牌 */
+body.wap .banner.hm-banner .t{max-width:66%;font-size:24px;line-height:1.2} /* R21-UI-05：标题缩小并限宽，副标题与“开始试玩”按钮不重叠 */
+body.wap .hm-banner .s{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:44px}
+body.wap .hm-banner .s{max-width:56%;overflow-wrap:break-word}
+html[lang=en] body.wap .banner.hm-banner .t{font-size:22px;line-height:1.15}
+html[lang=en] body.wap .hm-banner .s{font-size:12px;line-height:1.35}
+
+/* R16-QA-01：后台共用语言切换（简中 / English） */
+.adm-lang{display:inline-flex;gap:4px;margin-right:10px;background:rgba(255,255,255,.08);border-radius:8px;padding:2px}
+.adm-lang button{height:26px;padding:0 10px;white-space:nowrap;border-radius:6px;font-size:12px;color:#C9D1D6;background:transparent;border:0;cursor:pointer}
+.adm-lang button.on{background:#fff;color:#13181C;font-weight:600}
+</style>
+<style>
+html,body{height:100%}
+body{overflow:hidden;background:var(--bg-gray)}
+.prd{display:flex;height:calc(100% - 52px)}
+.prd .toc{width:272px;flex-shrink:0;background:#fff;border-right:1px solid #E1E7EA;overflow-y:auto;padding:14px 0 24px}
+.prd .toc .tt{font-size:11px;font-weight:600;color:var(--text-2);letter-spacing:.6px;padding:6px 20px 10px}
+.prd .toc .d{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 14px 8px 20px;font-size:13px;color:var(--text);border-left:3px solid transparent}
+.prd .toc .d:hover{background:var(--bg-green)}
+.prd .toc .d.on{border-left-color:var(--primary);background:var(--primary-weak);color:var(--primary);font-weight:600}
+.prd .toc .d .n{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;width:20px}
+.prd .toc .d.on .n{color:var(--primary)}
+.prd .toc .d .ar{margin-left:auto;font-size:10px;color:var(--text-2);transition:transform .15s}
+.prd .toc .grp.open .d .ar{transform:rotate(90deg)}
+.prd .toc .subs{display:none;padding:2px 0 6px}
+.prd .toc .grp.open .subs{display:block}
+.prd .toc .subs a{display:block;padding:5px 14px 5px 51px;font-size:12px;color:var(--text-2);text-decoration:none;line-height:1.5}
+.prd .toc .subs a:hover{color:var(--primary)}
+.prd .toc .grp.hide{display:none}
+.prd .main{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.prd .head{position:sticky;top:0;z-index:5;background:rgba(242,245,247,.94);backdrop-filter:blur(6px);border-bottom:1px solid #E1E7EA;padding:14px 32px;display:flex;align-items:center;gap:12px}
+.prd .head h1{font-size:17px;white-space:nowrap}
+.prd .head .menu{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:16px}
+.prd .search{flex:1;max-width:460px;margin-left:auto;position:relative}
+.prd .search input{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 34px 0 34px;font-size:13px;background:#fff;outline:none}
+.prd .search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-weak)}
+.prd .search .ic{position:absolute;left:11px;top:9px;color:var(--text-2);font-size:13px}
+.prd .search .x{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:12px;color:var(--text-2);display:none}
+.prd .search.has .x{display:block}
+.prd .hint{font-size:12px;color:var(--text-2);white-space:nowrap}
+.prd .body{max-width:980px;margin:0 auto;padding:24px 32px 80px}
+.prd .intro{background:#fff;border:1px solid #E1E7EA;border-radius:14px;padding:20px 22px;margin-bottom:22px}
+.prd .intro h2{font-size:20px}
+.prd .intro p{color:var(--text-2);margin-top:6px;line-height:1.7}
+.prd .intro .stats{display:flex;gap:28px;margin-top:14px;flex-wrap:wrap}
+.prd .intro .stats b{display:block;font-size:20px;color:var(--primary)}
+.prd .intro .stats span{font-size:12px;color:var(--text-2)}
+.prd .doc{background:#fff;border:1px solid #E1E7EA;border-radius:14px;padding:22px 24px 10px;margin-bottom:22px;scroll-margin-top:76px}
+.prd .doc.hide,.prd .sec.hide{display:none}
+.prd .doc .dh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.prd .doc .no{font-size:12px;font-weight:700;color:#fff;background:var(--primary);border-radius:6px;padding:2px 8px}
+.prd .doc h2{font-size:19px}
+.prd .doc .pp{margin-top:10px;background:var(--bg-green);border-radius:8px;padding:10px 14px;line-height:1.7;font-size:13px}
+.prd .doc .pp b{color:var(--primary)}
+.prd .sec{margin-top:18px;padding-bottom:12px;scroll-margin-top:76px}
+.prd .sec h3{font-size:14px;font-weight:600;padding-left:10px;border-left:3px solid var(--gold);margin-bottom:8px}
+.prd .sec p{line-height:1.75}
+.prd .sec ul{padding-left:20px;margin:6px 0}
+.prd .sec li{line-height:1.75;margin:2px 0}
+.prd .tw{overflow-x:auto;margin:8px 0;border:1px solid #E1E7EA;border-radius:10px}
+.prd table{border-collapse:collapse;width:100%;font-size:12.5px}
+.prd th{background:var(--bg-card);text-align:left;font-weight:600;color:#3A434B;padding:8px 12px;border-bottom:1px solid #E1E7EA;white-space:nowrap}
+.prd td{padding:8px 12px;border-top:1px solid #EEF2F4;line-height:1.6;vertical-align:top}
+.prd td{white-space:pre-line}
+.prd .sec ul li.lg{list-style:none;margin:10px 0 2px -20px;font-weight:600;font-size:13px;color:var(--text-2)}
+.prd tr:first-child td{border-top:0}
+.prd td:first-child{white-space:nowrap;font-weight:500}
+.prd .note{font-size:12px;color:var(--text-2);margin-top:4px}
+.prd .ef{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.prd .ef button{padding:5px 11px;border-radius:14px;background:var(--bg-gray);font-size:12px}
+.prd .ef button.on{background:var(--primary);color:#fff}
+.prd .ef input{flex:1;min-width:160px;height:30px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:12px;outline:none}
+.prd .ecnt{font-size:12px;color:var(--text-2);margin:4px 0}
+.prd .err{max-height:520px;overflow:auto}
+.prd .err th{position:sticky;top:0}
+.prd .err td:first-child{font-family:ui-monospace,Menlo,monospace;color:var(--primary)}
+.prd .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--primary-weak);color:var(--primary);white-space:nowrap}
+.prd mark{background:#FFE58A;color:inherit;border-radius:2px;padding:0 1px}
+.prd .empty{text-align:center;color:var(--text-2);padding:60px 0;display:none}
+.prd .foot{font-size:12px;color:var(--text-2);text-align:center;padding:10px 0 0}
+.prd .mask{display:none}
+@media (max-width:860px){
+  .topbar{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}.topbar .note{display:none}
+  .topbar .seg{overflow-x:auto;max-width:100%}.topbar .seg button{white-space:nowrap;padding:6px 10px}
+  body{overflow:auto}
+  .prd{height:auto;display:block}
+  .prd .toc{position:fixed;top:0;left:0;bottom:0;z-index:30;width:280px;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 20px rgba(0,0,0,.12)}
+  .prd.drawer .toc{transform:none}
+  .prd.drawer .mask{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:25}
+  .prd .main{overflow:visible}
+  .prd .head{padding:10px 16px;flex-wrap:wrap}
+  .prd .head .menu{display:block}
+  .prd .head h1{font-size:15px}
+  .prd .search{order:3;flex-basis:100%;max-width:none;margin:0}
+  .prd .hint{order:4}
+  .prd .body{padding:16px 16px 60px}
+  .prd .doc{padding:18px 16px 8px;scroll-margin-top:120px}
+  .prd .sec{scroll-margin-top:120px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="brand">德州扑克</span>
+  <div class="seg">
+    <a href="wap.html?demo=1"><button >前台 WAP</button></a>
+    <a href="web.html"><button >前台 Web</button></a>
+    <a href="admin.html"><button >总后台</button></a>
+    <a href="dealer.html"><button >派牌管理后台</button></a>
+    <a href="agent.html"><button >代理后台</button></a>
+    <a href="prd.html"><button class="on">PRD 文档</button></a>
+    <a href="plan.html"><button>开发计划</button></a>
+  </div>
+  <span class="sp"></span>
+  <span class="note">PRD 00～16 摘要版，完整规格以正式文档为准</span>
+</div>
+<div class="prd" id="prd">
+  <nav class="toc" id="toc"></nav>
+  <div class="mask" id="mask"></div>
+  <main class="main" id="main">
+    <div class="head">
+      <button class="menu" id="menuBtn" aria-label="目录">☰</button>
+      <h1>产品需求文档中心</h1>
+      <div class="search" id="sbox"><span class="ic">⌕</span><input id="q" placeholder="搜索规则、数字或错误码，例如 20001、抽水、VIP" autocomplete="off"><button class="x" id="qx" aria-label="清除">✕</button></div>
+      <span class="hint" id="hint"></span>
+    </div>
+    <div class="body" id="body"></div>
+  </main>
+</div>
+<script>/* PRD 文档中心资料（摘要版，依 德州/00～15_*.md 原文整理） */
+window.PRD_DOCS = [
+{id:'00',title:'总览与业务规则',purpose:'定义产品定位、角色、玩法权限、资金模型、营收与俱乐部经营规则，是其他文档的规则来源。',sec:[
+ {h:'产品定位与终端',li:['面向移动端的德州扑克 WAP 平台，浏览器即可试玩、参与现金桌与俱乐部赛事。','可添加到桌面（PWA），不开发原生 APP。','WAP 是唯一功能入口。','PC 浏览器 → 自动跳转品牌落地页（不能登录、不能玩）。','内置浏览器（Telegram、Facebook、Instagram、Line）→ 全屏遮挡，引导“在浏览器中打开”。','转化路径：新人局（免登录、虚拟筹码）→ 注册 → 现金桌（真实余额）→ 加入 / 创建俱乐部 → 俱乐部赛事。']},
+ {h:'角色定义',t:[['角色','说明','主要权限'],
+  ['未登录','第一次打开网站、任何退出登录后','浏览首页、现金桌列表、官方赛事；首次访问可开始游客试玩'],
+  ['游客','点“开始使用游客账号试玩”才建立、绑定设备；自动加入官方俱乐部','玩新人局；浏览首页、现金桌列表、官方赛事'],
+  ['玩家','已注册并登录','充提、现金桌、申请加入俱乐部、报名所在俱乐部赛事'],
+  ['俱乐部主','满足开通条件并创建俱乐部','审核成员、以平台模板开赛、开私人现金桌、查看报表、获得分成'],
+  ['合作代理','由后台标记的俱乐部主','免开通流水门槛；分成用专属固定比例'],
+  ['俱乐部管理员','由创建者任命，最多 5 人','审核入会、请离桌牌桌；不能开局'],
+  ['运营 / 财务 / 客服 / 风控','平台人员','内容与模板 / 充提审核与结算 / 用户查询与工单 / 异常监控与账号处置'],
+  ['包网商户','购买平台方案、运营自己站点的公司','使用代理后台管理本站业务']]},
+ {h:'玩法权限矩阵',t:[['玩法','需绑定邮箱','需加入俱乐部','筹码','由谁开设'],
+  ['新人局','✗','✗','虚拟筹码','平台'],
+  ['现金桌','✓','官方桌 ✗；私人桌 ✓','钱包余额','官方俱乐部（系统自动开桌）；私人俱乐部主'],
+  ['锦标赛 / SNG / 赏金赛 / 卫星赛','✓','✓','钱包余额','俱乐部主（平台模板）；官方赛事由平台开设']],
+  li:['浏览不拦截，操作才拦截；登录或注册后回到原页并恢复原操作。','新人局虚拟筹码与余额隔离，不能兑换、不能转入钱包。','现金桌超时即弃牌并标记暂离。','暂离照扣盲注。','满 10 分钟自动离桌结算。']},
+ {h:'多站点与资金模型',li:['多站点架构：账号、钱包、牌桌、俱乐部、赛事按站点隔离。','多站点架构：v1.0 只上线 1 个站点，提供英文、简体中文、繁体中文。','1 平台币 = 1 站点本位币；非本位币渠道按充值当时汇率换算，汇差为平台收入。','充提通过支付网关抽象层接入，支持本地法币渠道与 USDT（ERC20 / TRC20）。','提现流水要求：充值金额须完成 1 倍流水。','提现流水要求：未达标仍可提现，但整笔加收 5% 手续费。'],
+  t:[['余额状态','说明','进入','离开'],
+  ['可用','可带入、报名、提现','充值到账、离桌结算、赛事奖金、分成入账、占用释放','带入、报名、开设保底赛、提现'],
+  ['占用','已投入牌桌或赛事','现金桌带入、赛事报名、开设保底赛','离桌结算、开赛扣除、退赛 / 取消释放、保底结算'],
+  ['提现冻结','已申请提现，等待处理','提交提现申请','打款成功扣除；拒绝或失败退回可用']],note:'账户总额 = 可用 + 占用 + 提现冻结'},
+ {h:'平台营收模型',t:[['来源','计算方式'],
+  ['现金桌抽水','每手底池 5%，封顶按级别（见 05）；未看到翻牌不抽水'],
+  ['全押兑现手续费','兑现金额的 1%'],
+  ['赛事服务费','报名金额的 10%'],
+  ['充提手续费','按笔或按比例'],
+  ['汇差','非本位币渠道充提时的汇率差'],
+  ['商城','余额兑换钻石、购买道具']],
+  li:['成本项：支付通道费、俱乐部分成、全押兑现平台承担的输赢、VIP 返水、牌照与税费。','Jackpot 注入是玩家的钱，平台只代管，不算收入。','官方赛事服务费 100% 归平台；官方现金桌抽水 100% 归平台。']},
+ {h:'俱乐部经营与分成阶梯',li:['官方俱乐部：所有玩家（含游客）自动加入、不能退出、列表排第一。','创建条件：完成实名认证且现金桌与赛事累计流水 ≥ 5,000，系统自动开通。','创建条件：合作代理免流水门槛。','开局门槛：开私人现金桌、私人赛事时可用余额须大于 0；私人现金桌不收开桌费、不占用资金；无保底赛事不冻结资金。','保底赛：可用余额须足额，先冻结全部保底金额；报名与重进都截止后以最终有效奖池结算差额，只扣不足部分，其余释放；服务费不计入奖池。','赛事取消（开赛前）：玩家报名金额与服务费全额退还，门票报名退回门票；保证金全额释放。','评级按上一自然周（站点时区）评定，可升可降；整笔适用，不分段累进。','周结：周一计算（待复核）→ 周一～周二风控复核 → 周三计入俱乐部主可用余额。','分成追回：余额不足时显示负数并关闭提现、开赛、报名、入座权限（可登录、充值），补回到 0 即解除负余额限制，但开桌、开赛仍须可用余额大于 0。'],
+  t:[['等级','上周俱乐部赛事服务费总额','分成比例'],['—','< 10,000','0%'],['Lv1','≥ 10,000','5%'],['Lv2','≥ 50,000','10%'],['Lv3','≥ 150,000','15%'],['Lv4','≥ 200,000','20%'],['Lv5','≥ 500,000','25%'],['Lv6','≥ 1,000,000','30%']],note:'示例：上周服务费 160,000 → Lv3，分成 = 160,000 × 15% = 24,000'},
+ {h:'私人现金桌抽水分成',t:[['上周私人桌抽水总额（USDT 等值）','俱乐部主分成'],['< 50,000','30%'],['50,000 ～ < 100,000','35%'],['≥ 100,000','40%']]},
+ {h:'版本范围',li:['## v1.0 包含','基础：信息架构、账号、钱包与充提、首页、我的（含 VIP）、商城与道具。','新人局；现金桌：NLH / PLO4 / PLO5 / 6+ 短牌 / AoF。','现金桌附加：Jackpot / 全押兑现 / 多次发牌。','俱乐部；赛事：MTT / SNG / 赏金赛 / 卫星赛 / 多阶段赛事。','三套后台、PC 落地页。','## v1.0 不包含','v1.0 不包含：俱乐部联盟与跨俱乐部赛事、多站点同时上线、三语以外的语言。']}
+]},
+{id:'01',title:'信息架构与全局规则',purpose:'定义全站共用的页面地图、导航、登录拦截与回跳、终端环境、多语言时区、状态规范与公共组件。',sec:[
+ {h:'底部导航',t:[['位置','名称','说明','未登录点击','游客点击'],['1','首页','推荐内容与所有玩法入口（胶囊切换）','可进入','可进入'],['2','俱乐部','我的俱乐部、搜索、创建、管理','跳转登录页','跳转绑定页'],['3','充提','钱包首页（中间凸起主按钮）','跳转登录页','跳转绑定页'],['4','商城','钻石兑换、商品、我的道具','跳转登录页','跳转绑定页'],['5','我的','个人中心','可进入（未登录版）','可进入']]},
+ {h:'顶栏规则',t:[['页面类型','顶栏内容','底部导航'],['首页','LOGO、客服、语言','显示'],['其他一级页','页面标题、客服、语言','显示'],['二级页','左侧返回箭头、中间标题','显示'],['牌桌','不显示','不显示']]},
+ {h:'登录与访问控制',li:['账号状态：未登录 / 游客 / 正式账号。','未登录点入座、报名、俱乐部、充提、商城、消息中心 → 登录页 → 成功后回到原操作。','任何退出登录（含 00001 / 00002 失效、10013 冻结）统一回到未登录首页。','需绑定邮箱的操作：报名、入座、观战（新人局除外）、充值、提现、申请加入或创建俱乐部、购买商品。','登录有效期 7 天（有使用即重新计算）；同一账号只能一台设备登录，新设备登录旧设备立即失效。','敏感操作：提现、保存收款账户、删除通行密钥、解除第三方绑定。','敏感操作验证：邮箱验证码 → 通行密钥。','设备遗失后新增的通行密钥，24 小时内不能用于敏感操作。']},
+ {h:'终端与多语言',li:['iOS Safari / Android Chrome 与 PWA：完整支持。','内置浏览器：全屏遮挡，提供“复制链接”。','PC：自动跳转落地页。','PC 落地页内容：Banner、产品介绍、二维码、玩法特色、18 岁提示与条款。','落地页使用步骤：扫码打开 → 添加到桌面 → 开始游戏。','语言：英文、简体中文、繁体中文；默认简体中文，顶栏国旗切换后记住选择。','所有时间按站点时区显示并加注，如 20:00（UTC-3）。']},
+ {h:'状态规范',li:['加载：品牌 Loading（开站 / 进牌桌）、骨架屏、滑到底自动加载“加载中… / 没有更多了”、下拉刷新。','按钮提交：转圈且不可重复点击；超过 10 秒无回应提示“请求超时，请稍后再试”。','断网：顶部横幅“网络连接已断开”+“重试”，半透明全屏遮罩挡住所有点击。','Toast：屏幕中间、2 秒消失、成功 / 失败 / 一般三类、最多两行。','确认弹窗：左“取消”右“确认”。','确认弹窗：涉及金额列出金额与扣款后余额。','确认弹窗：高风险操作（关闭 / 解散俱乐部）确认按钮倒数 3 秒。']},
+ {h:'公共组件',li:['添加到桌面弹层：Banner、“立即添加”、iOS / Android 三步指南、10～15 秒教学视频。','最近玩浮窗：可拖动，显示进行中或最近牌桌；软键盘或弹窗时暂隐。','同时在桌限制：一个账号同时只能在 1 张牌桌；已报名赛事开赛前 10 分钟进入现金桌时提醒，开赛后进入电脑代打。']}
+]},
+{id:'02',title:'账号',purpose:'定义账号体系、游客账号、注册、登录、验证码、昵称、实名认证与账号安全。',sec:[
+ {h:'账号体系',li:['以邮箱为账号标识，一个邮箱一个账号；不设密码。','登录方式：通行密钥、邮箱验证码、第三方授权（Google / Facebook / Apple）。','须年满 18 岁；设备须支持通行密钥，否则不能注册或绑定。']},
+ {h:'游客账号',li:['未登录时点“开始使用游客账号试玩”才建立，绑定设备并进入新人局；清除浏览器资料即遗失。','注册 = 把邮箱绑定到当前游客账号；绑定后记录转入正式账号，新账号为 VIP0、只有官方俱乐部。','绑定的邮箱已是正式账号：提示登录原账号，游客账号作废。']},
+ {h:'注册与登录',li:['邮箱注册：输入邮箱 → 勾选满 18 岁与条款 → 拼图滑块 → 邮箱验证码 → 建立账号 → 设通行密钥 → 完成。','设置通行密钥为必须，不能跳过。','第三方授权：取得已验证邮箱直接建号；邮箱已注册则提示先登录原账号，不自动合并。','邀请链接注册：顶部显示“你受邀加入 {俱乐部名称}”，绑定后自动送出入会申请。','登录顺序：通行密钥（主按钮）→ 邮箱验证码 → 第三方授权；冻结账号登录后显示冻结说明，不进入首页。']},
+ {h:'验证码规则',t:[['项目','规则'],['格式','6 位数字'],['有效期','10 分钟'],['重发间隔','60 秒'],['错误次数','同一验证码输错 5 次失效'],['每日上限','同一邮箱每天最多 10 次'],['发送前','每次须通过拼图滑块']],note:'以上数值可在后台调整'},
+ {h:'昵称与实名认证',li:['昵称：2～12 个字符、站内唯一、过滤敏感词。','第一次入座、报名或进入新人局时要求设置昵称。','昵称每 30 天可改一次（改名卡不受限）。','实名认证在第一次提现、创建俱乐部时触发；流程：选证件 → 拍正反面 → 自拍活体 → 服务商审核。','认证状态：未认证 / 审核中 / 已通过 / 未通过（每天最多重新提交 3 次）；未满 18 岁账号冻结。']},
+ {h:'账号与安全',li:['通行密钥：新增须依序通过邮箱验证码与原有通行密钥；至少保留 1 个。','第三方绑定冲突时显示“授权账号已被绑定”，不覆盖；解绑须验证码 + 通行密钥。','v1.0 不开放自行注销，需联系客服。']}
+]},
+{id:'03',title:'钱包与充提',purpose:'定义余额模型、三种充值方式、提现流程与审核、收款账户、限额费率、资金安全与资金记录。',sec:[
+ {h:'余额模型',li:['账户总额 = 可用 + 占用 + 提现冻结；可提金额 = 可用余额。','金额以最小单位整数存储，前端显示 2 位小数。','余额可能为负（分成追回）；为负时可提金额显示 0，相关功能暂停（20008）。','统一用词：充值 / 提现（不用存款 / 取款）。']},
+ {h:'充值三种方式',t:[['方式','流程','关键规则'],
+  ['银行转账','输入金额 → 收款账户 + 6 码附言 → 用户转账 → “我已转账”（可附截图）→ 待核对 → 财务确认 / 驳回','订单 30 分钟有效（剩 5 分钟变红）；付款人须与实名一致，不一致驳回原路退回（20015）'],
+  ['USDT','选链（TRC20 / ERC20）→ 输入金额 → 检查充值上限 → 显示专属地址与二维码 → 链上确认 → 入账','确认：TRC20 19 次 / ERC20 12 次；汇率 = 报价 ± 0.5%；订单 30 分钟；到账才计上限'],
+  ['三方支付','输入金额 → 选通道 → 跳转三方支付页 → 回调成功 → 到账','通道限额 / 手续费由后台“渠道与费率”配置']],
+  li:['快捷金额 100 / 500 / 1,000 / 5,000。','须大于 0、最多两位小数。','银行转账 / 三方支付同时只能有一笔处理中订单（20012），下单即占用充值上限额度。','冷静期（80002）、自我排除（80003）、冻结（10013）、已达充值上限（80001）时不能充值。']},
+ {h:'充值限额',t:[['渠道','单笔最低','单笔最高','手续费'],['银行转账','10','5,000','0（通道费平台承担）'],['三方支付通道 A / B','后台配置','后台配置','后台配置'],['USDT-TRC20','10','不限','0'],['USDT-ERC20','50','不限','0']],note:'金额为 USDT 等值'},
+ {h:'提现',li:['前置检查顺序：实名认证（10014）→ 流水（20011，未达标整笔加收 5%）→ 收款账户（20010）。','流程：输入金额 → 选收款账户 → 确认 → 邮箱验证码 + 通行密钥 → 提现冻结 → 审核 → 打款。','确认页显示：手续费、预计到账、汇率锁定。','订单状态：待审核 → 审核通过 → 打款中 → 成功。','订单状态：失败 / 审核拒绝时冻结金额退回可用。','一般订单风控自动通过；单笔 ≥ 5,000、第一次提现、风控命中时转人工审核。','流水：充值须完成 1 倍流水，待完成流水可累计。','任一笔提现成功后，待完成流水清零。','返水、赛事奖金、分成、Jackpot 入账：各加 1 倍流水。']},
+ {h:'提现限额',t:[['渠道','单笔最低','单笔最高','每日次数','每日总额','手续费'],['本地法币渠道','20','10,000','5','50,000','0'],['USDT-TRC20','20','20,000','5','50,000','固定 1 USDT'],['USDT-ERC20','50','20,000','5','50,000','固定 5 USDT']],note:'每日次数与总额依 VIP 等级而定，上表为 VIP0～VIP2'},
+ {h:'收款账户与资金安全',li:['银行账户与 USDT 地址各最多 3 个。','保存与删除须验证码 + 通行密钥。','不可编辑。','新绑定账户 24 小时内不能提现（20005）。','银行账号 8～19 位数字。','开户姓名须与实名一致。','USDT 地址：TRC20 以 T 开头共 34 位，ERC20 以 0x 开头共 42 位。','热钱包余额上限 = 近 7 日平均每日提现量 × 1.5，超出自动归集冷钱包。','回调幂等，同一订单只入账一次。','订单编号：充值以 D、提现以 W 开头，后接日期 8 位与 6 位序号。']}
+]},
+{id:'04',title:'新人局',purpose:'定义免登录试玩的新手专区、配桌、虚拟筹码与结果页。',sec:[
+ {h:'核心规则',li:['所有人可玩（游客与正式账号），不限次数。','只有一种桌型：6 人桌，盲注 10 / 20。','新手专区含“开始试玩”与 牌型说明 / 游戏教学 / 新手技巧 三个入口；各内页不再显示页签，只显示所选内容。','开始前检查：冷静期（80002）→ 昵称（10015）→ 当日虚拟筹码为 0（30020）。','检查通过 → 询问是否先看教学（可勾“不再询问”）。']},
+ {h:'配桌',t:[['项目','规则'],['倒数','15 秒'],['凑满真人','倒数期间凑满 6 位真人提前开局'],['人数不足','剩 5 秒仍未凑满，补机器人入座'],['替换机器人','开局后有新真人进来，下一手前换掉一个机器人'],['机器人显示','与真人相同，不另外标示']]},
+ {h:'虚拟筹码',t:[['项目','规则'],['初始','1,000'],['重置','每天站点时区 00:00 重置为 1,000'],['带入','入座带上当日剩余全部虚拟筹码'],['离桌 / 输光','保留到下次重置 / 等待下次重置'],['使用范围','只在新人局，不会变成钱']]},
+ {h:'牌桌与结果页',li:['无时间银行、不抽水、不能使用延时卡；超时与断线同现金桌。','输光提示“今天的虚拟筹码已用完，明天 00:00 重置”。','结果页显示带入、离桌筹码、本次输赢、完成手数。','按钮：游客“再玩一次 / 绑定邮箱，加入牌局”。','按钮：正式账号“再玩一次 / 去现金桌”。','按钮：输光时“今日筹码已用完”置灰。']}
+]},
+{id:'05',title:'现金桌',purpose:'定义官方与私人现金桌、玩法、盲注级别与抽水、带入入座、暂离断线、结算、附加功能与倒数时间。',sec:[
+ {h:'桌子来源',t:[['项目','官方俱乐部桌','私人俱乐部桌'],['开桌','系统自动，每种“玩法 × 桌型 × 盲注”至少 1 张有空位','俱乐部主手动'],['可参加','所有人','该俱乐部成员'],['Jackpot / 全押兑现 / 多次发牌','都开，不能关','俱乐部主可设开关'],['同 IP / GPS','都开，不能关','都开，不能关（入座时自动检查）'],['抽水归属','100% 归平台','按分成表分给俱乐部主']]},
+ {h:'私人桌设定',li:['可设：玩法、桌型、盲注（只能从平台级别表选）、带入 100～500BB。','可设：各功能开关（同 IP / GPS 除外，一律开启）、自动重开。','牌桌时长：1 / 2 / 4 / 8 / 12 / 24 小时。','Straddle：只限 UTG 下 2BB。','剩 10 分钟且桌上 ≥ 2 人自动延长 1 小时。','抽水与倒数时间不可设定。','开桌后规则不能修改。','开桌门槛：创建者可用余额须大于 0；不收开桌费、不占用资金。','入座无审批：系统自动验证成员资格、余额、带入范围、冻结 / 冷静期 / 自我排除、同 IP、GPS 500 米、VPN / 代理，全部通过即入座。','暂停牌桌：时长暂停计算、不能入座，最长 30 分钟自动恢复。']},
+ {h:'玩法与桌型',li:['玩法：NLH、PLO4、PLO5、6+ 短牌、AoF；目前开放 NLH、AoF，其余标“即将开放”。','桌型：6 人桌、9 人桌；AoF 只开 6 人桌，只能全押或弃牌。','PLO 限池加注；6+ 短牌只用 6～A 共 36 张，每人前注 1、庄位另加 1，1BB = 1 前注。']},
+ {h:'盲注级别、抽水封顶与兑现上限（NLH / PLO4 / PLO5 / AoF）',t:[['盲注','抽水封顶','全押兑现单手上限'],['0.05/0.1','0.4（4BB）','20（200BB）'],['0.1/0.2','0.8（4BB）','40（200BB）'],['0.25/0.5','1.5（3BB）','100（200BB）'],['0.5/1','3（3BB）','200（200BB）'],['1/2','6（3BB）','400（200BB）'],['2/4','10（2.5BB）','800（200BB）'],['5/10','20（2BB）','2,000（200BB）'],['10/20','40（2BB）','4,000（200BB）']]},
+ {h:'6+ 短牌级别',t:[['前注','抽水封顶','全押兑现单手上限'],['0.1','0.4（4 前注）','20（200 前注）'],['0.25','1（4 前注）','50（200 前注）'],['0.5','1.5（3 前注）','100（200 前注）'],['1','3（3 前注）','200（200 前注）'],['2','5（2.5 前注）','400（200 前注）'],['5','10（2 前注）','1,000（200 前注）']]},
+ {h:'抽水与带入',li:['抽水 5%，封顶按级别。','没看到翻牌不抽水。','多次发牌不另抽。','边池按金额比例分摊。','带入 100～500BB 自由输入，快捷 100 / 200 / 500BB，默认 200BB；AoF 固定 10BB。','补充带入只在两手之间生效；离桌后 30 分钟内回同一桌，带入不能低于离桌筹码（30003）。','所有现金桌须授权定位才能入座。','同 IP 不能同桌。','GPS 相距小于 500 米不能同桌。']},
+ {h:'暂离、断线与结算',li:['超时即弃牌并暂离，照扣盲注，满 10 分钟自动离桌结算。','断线超过 60 秒弹“连接已中断”，可重新连接或返回首页（座位保留）。','离桌：当前这一手结束后离桌 → 结算中 → 结算完成；净变化 = 累计带出 − 累计带入。']},
+ {h:'附加功能',t:[['功能','规则'],['Jackpot','分池：全平台共用、按级别分池\n注入：见翻牌且底池 ≥ 30BB → 注入 1BB（9 人桌 0.8BB）\n触发：NLH AAATT 及以上被击败；PLO4 2222；PLO5 8888；短牌 6666\n分配：冤家牌方 10% / 胜方 3% / 其他拿到牌者每人 0.8%'],['全押兑现','条件：两人对决（不含 AoF）、翻牌后河牌前、胜率 > 60%、底池 > 20BB\n金额 =（底池 − 抽水 − Jackpot 注入）× 胜率，再扣 1% 手续费'],['多次发牌','只限两人全押且无后续下注；最多 3 次，双方同意才生效；拒绝或超时只发 1 次']]},
+ {h:'倒数时间（全平台统一）',t:[['项目','时间','超时处理'],['行动时间','翻牌前没人加注 10 秒；其他 15 秒；AoF 10 秒','使用时间银行'],['时间银行','入座 30 秒，每 50 手 +10 秒，最多 60 秒','弃牌并暂离'],['Straddle 决定','5 秒','—'],['全押兑现决定','10 秒','不兑现'],['多次发牌决定','10 秒','发 1 次'],['结算展示','2.5 秒','弹出本手结算视窗'],['带入弹窗','30 秒','释放座位'],['牌桌时长提醒','剩 10 分钟','—']],note:'延时卡每手最多 1 张，+30 秒；观战聊天只能快捷语与表情，发言间隔 3 秒'}
+]},
+{id:'06',title:'俱乐部',purpose:'定义俱乐部创建、加入、角色权限、成员与牌局管理、关闭解散、分成与报表。',sec:[
+ {h:'创建条件',t:[['对象','条件'],['一般玩家','完成实名认证，且现金桌与赛事累计流水 ≥ 5,000'],['合作代理','后台标记；免流水门槛，仍须实名'],['创建数量','每人最多 5 个（含已关闭、未解散），已达上限 50013']],
+  li:['名称：必填、40 字内、站内唯一（50002）。','名称不可含“官方”“平台”“客服”“admin”（50011）。','介绍：必填、200 字内。','新建只能选 5 张内建徽章头像；建立后创建者可上传自定义图片（AI 审核，敏感转人工，未通过 50012）。']},
+ {h:'加入俱乐部',li:['搜索名称 / ID → 申请（备注最多 50 字）→ 待审核 → 通过 / 拒绝（须填原因）。','7 天未审核自动拒绝。','可设免审核。','加入数量与成员人数不限。','邀请链接受邀者仍须申请，不能绕过审核。']},
+ {h:'角色与权限',t:[['权限','创建者','管理员','一般玩家'],['查看资料与成员','✓','✓','✓'],['编辑资料 / 任免管理员 / 移出成员','✓','✗','✗'],['审核入会申请','✓','✓','✗'],['开局（私人现金桌、赛事、保底赛）','✓','✗','✗'],['请离桌牌桌','✓','✓','✗'],['查看报表','✓','设置开启后 ✓','✗'],['解散牌局、取消赛事','✓','✗','✗'],['关闭、解散俱乐部','✓','✗','✗']],note:'管理员最多 5 人；无权限提示 00004'},
+ {h:'牌局管理',li:['同时牌局上限：私人现金桌 20 张（30010）、赛事 10 场（40016）。','开赛模板：MTT 标准（每级 10 分钟）/ 快速（5 分钟）/ 极速（3 分钟）、SNG 6 人、赏金赛标准。','报名金额：10 / 50 / 100 / 200（另加 10% 服务费）。','保底金额：500 / 1,000 / 3,000 / 10,000（SNG 不适用）。','已关闭不能开新局（50014）；余额为负不能开局（20008）；开私人现金桌、赛事须可用余额大于 0，私人现金桌不收开桌费、不占用资金。']},
+ {h:'关闭与解散',li:['关闭：不能加入新成员、不能开新局。','关闭：高风险操作，按钮倒数 3 秒 + 验证码 + 通行密钥。','关闭：可随时重新开启。','解散：须先关闭、无进行中牌局且全部结算、成员无未使用的本俱乐部门票；不满足提示 50007。','未结分成照常于下次周结发给创建者。']},
+ {h:'分成与报表',t:[['对象','赛事服务费','私人桌抽水'],['一般俱乐部主','阶梯表（00 第 7.4 节）','分成表（05 第 6.2 节）'],['合作代理','固定比例（后台逐个设定）','固定比例（后台逐个设定）']],li:['报表页签：近 7 天、牌局明细、分成（只有创建者）；只计算已结算记录。']}
+]},
+{id:'07',title:'赛事',purpose:'定义 MTT / SNG / 赏金赛 / 卫星赛 / 多阶段赛事的赛制、费用、模板、报名取消、比赛进行与结算。',sec:[
+ {h:'赛制与费用',t:[['赛制','说明'],['MTT 锦标赛','多桌，按名次分配奖池'],['SNG 单桌赛','单桌 6 人，坐满即开赛'],['赏金赛','锦标赛 + 固定淘汰赏金（非渐进式）'],['卫星赛','奖励为指定主赛门票'],['多阶段赛事','连续 3 天分阶段；目前“即将开放”']],
+  li:['报名费 = 报名金额 + 服务费（报名金额 10%），例：100 + 10 = 110。','赏金赛报名金额拆为名次奖池与赏金，默认各 50%。','重进：重新支付报名费（含服务费），重拿起始筹码。','只看得到已加入俱乐部的赛事；私人赛事只由创建者以平台模板开设。']},
+ {h:'模板：速度与起始筹码',li:['速度：标准每级 10 分钟。','速度：快速每级 5 分钟。','速度：极速每级 3 分钟。','起始筹码：MTT / 赏金赛 / 卫星赛 10,000；SNG 3,000（盲注按比例缩小）。','延迟报名默认第 4 级结束截止；重进默认第 4 级结束前、最多 1 次。','最低开赛人数：MTT / 赏金赛 / 卫星赛默认 6 人；SNG 坐满 6 人才开赛。']},
+ {h:'盲注表（起始筹码 10,000）',t:[['级别','小盲 / 大盲','前注'],['1','25 / 50','0'],['2','50 / 100','0'],['3','100 / 200','25'],['4','150 / 300','25'],['5','200 / 400','50'],['6','300 / 600','75'],['7','400 / 800','100'],['8','600 / 1,200','150'],['9','800 / 1,600','200'],['10','1,000 / 2,000','250']],note:'之后每级翻倍，直到决出冠军'},
+ {h:'奖励分配',t:[['报名人数','获奖名次','分配（%）'],['6～9','前 2','65 / 35'],['10～18','前 4','40 / 30 / 20 / 10'],['19～27','前 5','37 / 27 / 18 / 10 / 8'],['28～45','前 6','33 / 22 / 16 / 12 / 9 / 8'],['46～100','前 9','30 / 19 / 13 / 10 / 8 / 6.5 / 5 / 4.5 / 4'],['100 以上','约前 15%（向下取整）','后台按模板配置，第 1 名不超过 30%']],note:'SNG（6 人）：第 1 名 65%、第 2 名 35%；按报名人次计，重进一次算一次'},
+ {h:'报名与取消',li:['服务端确认名额并完成扣款后才显示报名成功；提交中重复点击不重复扣款。','满员 40002、截止 40001、已报名 40003；延迟报名成功后直接分配座位。','开赛前自行取消：全额退款（含服务费），门票报名退回门票；已开赛不能取消（40004）。','赛事被取消：玩家报名金额与服务费全额退还，门票报名退回门票；保证金全额释放。']},
+ {h:'比赛进行与结算',li:['升盲在下一手生效；同一手多人出局，开始时筹码较多者名次较高。','每 55 分钟休息 5 分钟（SNG 不休息）；中途不能离桌。','离开牌桌画面即电脑代打：能过牌就过牌，否则弃牌。','赛事没有时间银行、不能使用延时卡；超时自动过牌，不能过牌则弃牌。','奖励只发放一次（40014）；淘汰可重进时弹窗说明费用。']},
+ {h:'卫星赛与保底赛',li:['门票数量 = 奖池 ÷ 主赛报名费（含服务费）；余数现金发给下一名。','例：奖池 1,000、主赛 100 + 10 → 发 9 张门票，余 10 现金。','门票只能用于同一俱乐部指定主赛；不可转让、折现或退款。','保底差额由开赛方承担：开设时先冻结全部保底金额；报名与重进都截止后以最终有效奖池结算差额，只扣不足部分，其余释放；服务费不计入奖池。']}
+]},
+{id:'08',title:'首页',purpose:'定义首页结构、胶囊切换、各用户状态差异、账户卡、Banner、公告栏、消息中心与俱乐部赛事区块。',sec:[
+ {h:'页面结构',li:['由上到下：顶栏 → 胶囊 → Banner → 公告栏 → 账户卡 → 新手教学卡。','接着：玩法快捷入口 → 俱乐部赛事 → 扑克焦点 → 底部导航。','顶栏含：LOGO、客服、语言。','胶囊：精选 / 现金桌 / 锦标赛 / SNG / 赏金赛 / 卫星赛 / 新手；首页不另设大厅，“新手”胶囊永远显示。']},
+ {h:'用户状态差异',t:[['状态','判断','首页差异'],['未登录-新用户','设备 / IP 从未登录过','未登录账户卡“还未注册”+【注册】；显示“新手试玩”卡；俱乐部赛事区为空状态卡'],['未登录-老用户','此 IP 曾登录过','“还未登录”+【登录】；不显示“新手试玩”卡'],['游客','游客账号','显示绑定卡“绑定邮箱，加入牌局”；未玩过时显示新手教学卡'],['新手','从未实际玩过任何一局','显示新手教学卡'],['一般玩家','玩过至少一局','隐藏新手教学卡']]},
+ {h:'Banner 与公告',li:['Banner 由后台配置，最多 5 张、5 秒自动轮播；显示对象分 全部 / 游客 / 正式账号。','公告栏单行跑马灯；未读数超过 99 显示 99+，游客只计官方公告。','账户卡（正式账号）：账号、玩家 ID、VIP 标签、可用余额、充值 / 提现。']},
+ {h:'消息中心',li:['页签：官方公告 / 信息 / 俱乐部消息；只有平台能发消息。','游客只收官方公告；消息永久保留，用户自行删除（删除已读需二次确认）。','俱乐部主收到新的入会申请时实时弹窗“前往审核 / 稍后处理”。']},
+ {h:'其他区块',li:['俱乐部赛事：已加入俱乐部尚未开赛的赛事，最多 4 场，按开赛时间排序。','扑克焦点：首页最新 3 则，分类 全部 / 教学 / 俱乐部动态。','“添加到桌面”浮窗可收至右侧；从桌面图标打开时不显示。']}
+]},
+{id:'09',title:'我的',purpose:'定义个人中心结构、我的账户、头像、门票、我的赛事、牌局记录、游戏设置、VIP 与活动中心。',sec:[
+ {h:'页面结构',li:['由上到下：账户卡 → 未读消息 → 6 个快捷入口 → 记录中心 → 活动中心、防沉迷设置、帮助中心 → 退出登录。','账户卡：头像、昵称、账号、玩家 ID、余额、VIP 横条。','快捷入口：记录中心 / 我的门票 / 我的赛事 / 我的俱乐部 / 我的道具 / 添加到桌面。','未登录：只显示头像占位、“你还未登录”与【登录】【注册】（首次访问另有【游客试玩】）。','游客退出警告：“游客账号退出后将无法找回，新人局记录也会一并清除。建议先绑定邮箱。”']},
+ {h:'头像、门票、记录',li:['头像：系统头像 4 个页签各 8 个，或上传后圆形裁剪（AI 审核，未通过 50012）。','门票：线上门票（卫星赛）与多阶段赛事各阶段门票；有可使用门票时快捷入口显示红色数字。','牌局记录：筛选 全部 / 现金桌 / 赛事，支持逐街回放；新人局不计入。','游戏设置只在牌桌菜单：音效、背景音乐、显示实际金额 / BB（首次默认 BB）、四色牌面。']},
+ {h:'VIP 等级',t:[['等级','当月贡献','返水','每日提现','专属客服'],['VIP0','< 10','0%','5 次 / 50,000',''],['VIP1','≥ 10','15%','5 次 / 50,000',''],['VIP2','≥ 50','17.5%','5 次 / 50,000',''],['VIP3','≥ 200','20%','8 次 / 100,000',''],['VIP4','≥ 500','25%','8 次 / 100,000',''],['VIP5','≥ 1,500','30%','10 次 / 200,000','✓'],['VIP6','≥ 5,000','35%','10 次 / 200,000','✓'],['VIP7','≥ 15,000','40%','不限次 / 500,000','✓']],note:'当月贡献 = 抽水（贡献法分摊）+ 服务费'},
+ {h:'评级与返水',li:['当月贡献达门槛即时升级；每月 1 日依上月贡献重新评级，可升可降。','返水每周结算：上周贡献 × 当前等级比例，直接计入可用余额，并加 1 倍流水要求；VIP0 无返水。']},
+ {h:'活动中心',li:['页签：进行中 / 已参加 / 已结束。','签到、首存 / 再存（互斥，可选“不参加优惠”）、邀请好友、当期贡献、任务（提交截图或链接）。','手动领取：须于 7 天内领取。','领取检查：游客 00003、已结束 70002、不符合对象 70003、预算用完 70004、重复领取 70005。']}
+]},
+{id:'10',title:'后台',purpose:'章节内容统一在文末“10 后台全文与 16 派牌管理后台”段维护',sec:[
+]},
+{id:'11',title:'接口需求说明',purpose:'列出各模块所需的接口、共用规则、关键状态机与 WebSocket 实时事件（路径与字段由后端定义）。',sec:[
+ {h:'共用规则',t:[['项目','规则'],['风格','一般请求用 REST；牌桌与实时状态用 WebSocket'],['版本','路径带版本号 /api/v1/...'],['站点','每个请求带站点标识，数据按站点隔离'],['鉴权','token 7 天内有使用自动延长；新设备登录旧 token 立即失效'],['幂等','动钱接口都带请求编号，重复送出只处理一次'],['金额','最小单位整数存储；接口用字串、固定 2 位小数（如 "12.50"）'],['时间','服务端一律 UTC 时间戳，前端按站点时区显示'],['分页','游标分页'],['超时','10 秒未回应提示超时；动钱请求先查询原订单再重试']]},
+ {h:'接口分组',t:[['编号段','模块','代表接口'],['1xxxx','账号','建立游客账号、验证码、注册 / 绑定、通行密钥、第三方授权、昵称、实名、头像、防沉迷'],['2xxxx','钱包','余额、充值方式、银行转账、USDT 地址、提现、收款账户、资金流水、支付回调'],['3xxxx','牌桌','玩法列表、牌桌详情、入座带入、补充带入、离桌、观战、定位、新人局配桌、私人桌管理'],['4xxxx','赛事','列表详情、报名、取消、重进、我的赛事、结算、门票、开设赛事、进入比赛'],['5xxxx','俱乐部','搜索、申请审核、成员、创建、关闭解散、邀请、头像、报表分成'],['6xxxx','商城','钻石档位与兑换、商品购买、我的道具、商城订单、使用道具'],['7xxxx','消息与内容','消息列表与已读、Banner、扑克焦点、公告'],['8xxxx','VIP 与活动','VIP 资讯、返水记录、活动列表与领取'],['9xxxx','后台','13 个模块、登录、角色权限、派牌与代理后台']]},
+ {h:'主要状态机',t:[['对象','状态'],['提现订单','待审核 → 审核通过 → 打款中 → 成功；失败或审核拒绝 → 退回'],['报名','已报名 → 已取消；已报名 → 已开赛 → 已淘汰 / 已结束'],['入会申请','待审核 → 通过 / 拒绝 / 已过期（7 天）'],['牌桌座位','空 → 带入中 → 入座 → 暂离 → 离桌结算中 → 空'],['俱乐部','正常 ⇄ 已关闭 → 已解散'],['商户结算单','草稿 → 财务复核 → 已发送商户 → 已结清']]},
+ {h:'WebSocket 事件',li:['## 牌桌事件','发牌与行动：入座离座、发手牌（只发本人）、轮到行动、公共牌、底池、摊牌结算。','附加功能：全押兑现、多次发牌、Jackpot、Straddle。','状态：暂离、断线同步、观战聊天、暂停恢复、时长剩 10 分钟。','## 其他事件','赛事：开赛分桌、升盲、休息、换桌合桌、淘汰名次、决赛桌、结算、开赛前 10 分钟提醒、电脑代打。','账号：被其他设备登出、账号冻结、余额变动、新消息、维护通知、新的入会申请。']}
+]},
+{id:'12',title:'数据埋点与指标',purpose:'定义北极星与指标体系、数据架构、埋点规则与各模块事件表。',sec:[
+ {h:'北极星指标',p:'每日活跃付费玩家数：当天（站点时区）至少产生 1 笔抽水（贡献法分摊）或赛事服务费的正式账号数。不含新人局、只充值未玩、只购买商品。'},
+ {h:'指标体系',t:[['类别','指标'],['营收','GGR、NGR；ARPU / ARPPU；商城收入、兑现手续费、充提手续费'],['获客与转化','首充人数 / 首充率（FTD）、CPA / CAC、添加到桌面完成率\n漏斗：首访 → 第一手 → 绑定邮箱 → 首充 → 入会'],['留存','次日 / 7 日 / 30 日留存、流失率、LTV、LTV : CAC'],['扑克','每手平均抽水、每日手数、活跃牌桌数、座位占用率、赛事满员率、保底差额、机器人占比、俱乐部数'],['支付与合规','充值成功率、提现审核时长、实名通过率、风控命中数、防沉迷指标']]},
+ {h:'数据架构与规则',li:['数据链路：RudderStack（私有部署）→ ClickHouse 数仓 → Metabase BI。','v1.0 自建产品分析看板。','命名：对象_动作，英文小写加下划线。','埋点来源：结果型事件一律服务端埋点（S），曝光与点击为前端埋点（F）。','公共属性：站点、账号 ID、账号类型、VIP 等级、语言、设备、时间。']},
+ {h:'主要事件分类',t:[['分类','代表事件'],['通用','session_start、page_view、banner_clicked、language_switched、error_shown、network_offline、bind_prompt、capsule_switched、pwa_installed'],['账号','guest_created、login_redirect、otp_sent、email_bound、login_succeeded、passkey_created、kyc_result、kicked_other_device'],['新人局','newbie_start_clicked、tutorial_chosen、newbie_matched、newbie_hand_completed、newbie_result_bind_clicked'],['现金桌','table_viewed、table_sit_down、buyin_succeeded、sitout_started、table_left、ev_cashout_accepted、jackpot_triggered'],['赛事','tournament_viewed、tournament_registered、tournament_cancelled、tournament_reentered、tournament_eliminated、tournament_autoplay'],['钱包','deposit_order_created、deposit_succeeded、withdraw_requested、withdraw_succeeded、withdraw_failed'],['俱乐部','club_searched、club_join_applied、club_join_approved、club_created、club_dissolved、invite_link_opened'],['商城','shop_item_viewed、diamond_exchanged、shop_item_purchased、item_equipped、item_used'],['合规 / 消息 / 活动','rg_limit_set、deposit_limit_blocked、message_opened、vip_level_changed、activity_joined、reward_claimed']]}
+]},
+{id:'13',title:'合规与风控',purpose:'定义牌桌反作弊、反洗钱与资金风控、防沉迷设置、合规基础与账号冻结。',sec:[
+ {h:'反作弊',t:[['类型','识别方式'],['伙牌','账号关联（设备指纹、IP、支付方式、网络）+ 牌局行为分析'],['筹码对倒','反复大额输给同一人、不合理下注'],['机器人 / 外挂（RTA）','决策速度、下注模式、长期胜率异常'],['多开 / 代打','同设备多账号、账号由他人操作']],
+  li:['处置：告警 → 风控人工调查 → 冻结 / 没收不当得利 / 封号；没收金额按受害玩家损失比例退还，无法认定的归平台。','规则启停只有超级管理员可操作，须填原因。']},
+ {h:'反洗钱',li:['制裁名单与 PEP 名单筛查（注册、提现、名单更新时）。','大额或可疑时要求资金来源证明（80006）。','提现风控：1 倍流水、大额转人工、新绑定账户 24 小时、开户姓名须与实名一致。']},
+ {h:'防沉迷设置',t:[['工具','规则'],['充值上限','每日 / 每周 / 每月；调低立即生效，调高 24 小时后生效；到账后计入已用'],['时长提醒','15 / 30 / 60 / 120 分钟（默认 60），不能关闭；按钮“离开 / 继续”'],['冷静期','24 小时 / 7 天 / 30 天；确认倒数 3 秒；期间不能充值、入座、报名、玩新人局、购买；不能提前解除'],['自我排除','6 个月 / 1 年 / 5 年 / 永久；确认倒数 5 秒；期间只能提现（80003）；不能提前解除']]},
+ {h:'合规基础与账号冻结',li:['地区封锁：IP + 注册地 + 定位；未满 18 岁账号冻结，充值本金退回、赢得金额没收。','发牌随机数取得 GLI 或 iTech Labs 认证。','冻结条件：风控命中、未满 18 岁、制裁名单命中；前台强制弹窗 10013 → 登出回未登录首页。','冻结后：现金桌本手结束离桌结算。','冻结后：进行中赛事电脑代打到结束。','冻结后：未开赛报名全额退款。','冻结后：余额保留不能使用。','冻结后：解冻须经风控审核。']}
+]},
+{id:'14',title:'商城与道具',purpose:'定义商城入口、钻石兑换、商品类型、购买流程与我的道具。',sec:[
+ {h:'钻石',li:['汇率：1 USDT 等值 = 60 钻石；固定档位，大档位额外加送。','只能以余额兑换钻石。','不能换回余额、不能提现、不能转让。','永久有效。','余额为负不能兑换（20008），已有钻石仍可购买。'],
+  t:[['支付（USDT 等值）','获得钻石','加送'],['1','60','—'],['5','300','—'],['10','620','20'],['50','3,200','200'],['100','6,600','600']]},
+ {h:'商品',t:[['类型','商品','规则'],['外观','头像框','同桌所有人看得到'],['外观','牌背、桌布','只有自己看得到'],['功能卡','改名卡','不受 30 天限制，立即改名'],['功能卡','看公共牌卡','即将开放'],['延时卡','延时卡','每张 +30 秒；每手最多 1 张；只限现金桌']],note:'所有商品不可转让、不可退款'},
+ {h:'购买与背包',li:['检查顺序：游客 00003 → 冻结 10013 → 冷静期 / 自我排除 80002 / 80003。','接着：已下架 60002 → 超过限购 60003 → 钻石不足 60001。','购买成功：“「{商品}」已放入我的道具”。','我的道具：外观可装备 / 卸下，同一子类只能装备一个。','我的道具：改名卡可“使用”。','我的道具：延时卡标示“牌桌内使用”。']}
+]},
+{id:'15',title:'前后端串接与异常处理',purpose:'集中定义所有错误码、前端处理方式、前端本地校验与 WebSocket 断线重连规则。',sec:[
+ {h:'前端处理方式',t:[['方式','用在','做法'],['Toast','一般失败，可自行重试','屏幕中间 2 秒消失'],['字段提示','表单输入错误','输入框下方红字，不清空内容'],['引导弹窗','须先完成某件事','说明 +“取消”“去 XX”，完成后回原页'],['强制弹窗','无法继续使用','不可关闭，只有一个按钮'],['整页','维护、整页加载失败','维护页 / 失败页'],['刷新','数据已变化','Toast + 自动刷新']],note:'画面不显示错误码，只显示文案'},
+ {h:'错误码表',errors:true},
+ {h:'WebSocket 断线重连',li:['心跳每 15 秒一次，连续 2 次无回应视为断线。','断线显示“连接中断，正在重连…”，行动按钮变灰。','自动重连：立即、2 秒、4 秒、8 秒……最长 30 秒一次。','超过 60 秒仍未连上：显示“连接已中断”与“重新连接”“返回首页”。','重连成功取得完整牌桌状态覆盖画面；切到后台再回来立即重连。']},
+ {h:'维护规则',li:['RD 发现新失败情境，新增一列并标“待 PM 确认”；PM 确认后改为“已确认”。','错误码只新增、不重用；废弃的标“已废弃”。']}
+]}
+];
+/* 错误码：编号、分类、文案、前端处理、按钮 / 跳转（依 15 第 3 节） */
+window.PRD_ERRORS=[["00001","通用（0xxxx）","登录已失效，请重新登录","强制弹窗","重新登录 → 未登录首页"],["00002","通用（0xxxx）","你的账号已在其他设备登录。如非本人操作，请立即联系客服。","强制弹窗","重新登录 → 未登录首页"],["00003","通用（0xxxx）","请先绑定邮箱","引导弹窗","取消 / 去绑定 → 绑定页；完成后继续原操作"],["00004","通用（0xxxx）","没有操作权限","Toast","—"],["00005","通用（0xxxx）","系统维护中","整页","维护页"],["00006","通用（0xxxx）","参数错误","Toast","—"],["00007","通用（0xxxx）","请求超时，请稍后再试","Toast","动钱的请求先查询原订单"],["00008","通用（0xxxx）","请先完成安全验证","引导弹窗","依序弹出邮箱验证码、通行密钥验证"],["00009","通用（0xxxx）","服务器繁忙，请稍后再试","Toast","动钱的请求先查询原订单"],["00010","通用（0xxxx）","操作太频繁，请稍后再试","Toast","—"],["10001","账号（1xxxx）","邮箱格式错误","字段提示","—"],["10002","账号（1xxxx）","该邮箱已注册","字段提示","—"],["10003","账号（1xxxx）","该邮箱尚未注册","字段提示","—"],["10004","账号（1xxxx）","验证码不正确，请重新输入","字段提示","—"],["10005","账号（1xxxx）","验证码已过期，请重新获取","字段提示","—"],["10006","账号（1xxxx）","今日发送次数已达上限，请明天再试","Toast","联系客服"],["10007","账号（1xxxx）","安全验证失败，请重试","Toast","重新显示滑块"],["10008","账号（1xxxx）","授权失败，请重试，或使用邮箱注册","Toast","—"],["10009","账号（1xxxx）","授权账号已被绑定","Toast","—"],["10010","账号（1xxxx）","昵称已被使用","字段提示","—"],["10011","账号（1xxxx）","昵称包含不允许的内容","字段提示","—"],["10012","账号（1xxxx）","昵称每 30 天只能修改一次","字段提示","—"],["10013","账号（1xxxx）","账号已冻结，请联系客服","强制弹窗","联系客服"],["10014","账号（1xxxx）","请先完成实名认证","引导弹窗","取消 / 去认证 → 实名认证页"],["10015","账号（1xxxx）","请先设置昵称","引导弹窗","设置昵称弹窗；完成后继续原操作"],["10016","账号（1xxxx）","昵称须为 2～12 个字符","字段提示","—"],["10017","账号（1xxxx）","请 60 秒后再获取","Toast","—"],["10018","账号（1xxxx）","验证码已失效，请重新获取","字段提示","同一验证码输错 5 次"],["10019","账号（1xxxx）","今日实名提交次数已达上限，请明天再试","Toast","—"],["10020","账号（1xxxx）","已取消授权","Toast","—"],["10021","账号（1xxxx）","该邮箱已注册，请先登录原账号，再绑定此授权方式","引导弹窗","取消 / 去登录 → 登录页"],["10022","账号（1xxxx）","授权处理中，请勿重复操作","Toast","—"],["10023","账号（1xxxx）","请先确认已满 18 岁并同意条款","字段提示","—"],["10024","账号（1xxxx）","实名资料已通过，如需修改请联系客服","Toast","—"],["10025","账号（1xxxx）","通行密钥验证失败，请重试","Toast","—"],["10026","账号（1xxxx）","至少需保留一个通行密钥","Toast","—"],["10027","账号（1xxxx）","新的通行密钥 {时间}后才能用于此操作","Toast","—"],["10028","账号（1xxxx）","当前设备不支持通行密钥，请更换设备","整页","—"],["20001","钱包（2xxxx）","余额不足","引导弹窗","取消 / 去充值 → 充值页"],["20002","钱包（2xxxx）","金额超出渠道限额","字段提示","—"],["20003","钱包（2xxxx）","订单已过期","引导弹窗","取消 / 重新充值 → 充值页"],["20004","钱包（2xxxx）","收款账户无效","字段提示","—"],["20005","钱包（2xxxx）","新绑定的收款账户 24 小时内不能提现","Toast","—"],["20006","钱包（2xxxx）","已超过今日提现次数或额度","Toast","—"],["20007","钱包（2xxxx）","收款账户数量已达上限","Toast","—"],["20008","钱包（2xxxx）","余额为负，相关功能已暂停","引导弹窗","取消 / 去充值 → 充值页"],["20009","钱包（2xxxx）","地址格式不符合所选的链","字段提示","—"],["20010","钱包（2xxxx）","请先添加收款账户","引导弹窗","取消 / 去添加 → 收款账户页"],["20011","钱包（2xxxx）","流水未完成，本次提现将加收 5% 手续费","确认弹窗","列出尚需流水与手续费；取消 / 仍要提现"],["20012","钱包（2xxxx）","订单处理中，请勿重复提交","Toast","显示原订单"],["20013","钱包（2xxxx）","开户姓名须与实名姓名一致","字段提示","—"],["20014","钱包（2xxxx）","金额低于单笔最低限额","字段提示","—"],["20015","钱包（2xxxx）","付款人姓名与实名姓名不一致，已驳回，款项将原路退回","Toast","订单详情显示驳回原因"],["30001","牌桌（3xxxx）","牌桌已满员","刷新","回到现金桌列表"],["30002","牌桌（3xxxx）","座位已被占用","刷新","刷新座位"],["30003","牌桌（3xxxx）","带入金额超出范围","字段提示","—"],["30004","牌桌（3xxxx）","请先授权定位","引导弹窗","取消 / 去授权 → 系统定位授权"],["30005","牌桌（3xxxx）","附近有玩家在本桌","Toast","—"],["30006","牌桌（3xxxx）","同一 IP 地址的玩家不能同桌","Toast","—"],["30007","牌桌（3xxxx）","带入申请未通过（已废弃：R7-CLB-01 删除带入审批，码不重用）","Toast","—"],["30008","牌桌（3xxxx）","牌局已解散","刷新","回到现金桌列表"],["30009","牌桌（3xxxx）","不符合兑现条件","Toast","—"],["30010","牌桌（3xxxx）","牌局数量已达上限","Toast","—"],["30011","牌桌（3xxxx）","只有俱乐部成员可以加入","引导弹窗","取消 / 申请加入 → 俱乐部详情"],["30012","牌桌（3xxxx）","带入确认中，请稍候","Toast","—"],["30013","牌桌（3xxxx）","带入超时，座位已释放","刷新","刷新座位"],["30014","牌桌（3xxxx）","你没有观战此牌桌的资格","Toast","游客用 00003"],["30015","牌桌（3xxxx）","不符合多次发牌条件","Toast","—"],["30016","牌桌（3xxxx）","本桌未开放此功能","Toast","—"],["30017","牌桌（3xxxx）","无效操作","Toast","前端先限制按钮"],["30018","牌桌（3xxxx）","开桌参数超出允许范围","字段提示","—"],["30019","牌桌（3xxxx）","开桌后规则不能修改","Toast","—"],["30020","牌桌（3xxxx）","今天的虚拟筹码已用完，明天 00:00 重置","Toast","—"],["30021","牌桌（3xxxx）","离桌结算中，请勿重复操作","Toast","—"],["40001","赛事（4xxxx）","报名已截止","刷新","刷新赛事详情"],["40002","赛事（4xxxx）","报名人数已满","刷新","刷新赛事详情"],["40003","赛事（4xxxx）","你已报名本场","刷新","进入等待页"],["40004","赛事（4xxxx）","比赛已开始，不能取消报名","Toast","—"],["40005","赛事（4xxxx）","重进次数已用完","Toast","—"],["40006","赛事（4xxxx）","门票已过期","Toast","—"],["40007","赛事（4xxxx）","本场主赛已截止或满员","Toast","不扣门票"],["40008","赛事（4xxxx）","只有俱乐部成员可以报名","引导弹窗","取消 / 申请加入 → 俱乐部详情"],["40009","赛事（4xxxx）","本场未开放重进或已过重进截止","Toast","—"],["40010","赛事（4xxxx）","门票不适用本场赛事","Toast","—"],["40011","赛事（4xxxx）","门票已使用","Toast","—"],["40012","赛事（4xxxx）","正在分配座位，请稍候","Toast","前端先禁用按钮"],["40013","赛事（4xxxx）","退款处理中，请勿重复操作","Toast","—"],["40014","赛事（4xxxx）","奖励已发放","Toast","—"],["40015","赛事（4xxxx）","赛事参数超出允许范围","字段提示","—"],["40016","赛事（4xxxx）","赛事数量已达上限","Toast","—"],["50001","俱乐部（5xxxx）","尚未达到创建俱乐部的条件","Toast","—"],["50002","俱乐部（5xxxx）","俱乐部名称已被使用","字段提示","—"],["50003","俱乐部（5xxxx）","申请正在审核","Toast","—"],["50004","俱乐部（5xxxx）","你已加入该俱乐部","刷新","刷新俱乐部详情"],["50005","俱乐部（5xxxx）","该成员有进行中的牌局、未完成结算或已报名的赛事","Toast","—"],["50006","俱乐部（5xxxx）","管理员数量已达上限","Toast","—"],["50007","俱乐部（5xxxx）","暂时无法解散俱乐部","Toast","—"],["50008","俱乐部（5xxxx）","俱乐部邀请已失效","Toast","—"],["50009","俱乐部（5xxxx）","官方俱乐部不能退出","Toast","—"],["50010","俱乐部（5xxxx）","俱乐部已关闭，不能加入","Toast","—"],["50011","俱乐部（5xxxx）","名称或介绍不符合规定","字段提示","—"],["50012","俱乐部（5xxxx）","头像审核未通过，已保留原头像","Toast","—"],["50013","俱乐部（5xxxx）","创建的俱乐部数量已达上限","Toast","—"],["50014","俱乐部（5xxxx）","俱乐部已关闭，不能开新局","Toast","—"],["60001","商城（6xxxx）","钻石不足","引导弹窗","取消 / 去兑换 → 钻石兑换"],["60002","商城（6xxxx）","商品已下架","刷新","刷新商品列表"],["60003","商城（6xxxx）","已超过限购数量","Toast","—"],["60004","商城（6xxxx）","道具已过期","Toast","—"],["60005","商城（6xxxx）","本手已使用延时卡","Toast","—"],["60006","商城（6xxxx）","此道具只能在现金桌使用","Toast","—"],["60007","商城（6xxxx）","赛事中不能购买延时卡","Toast","—"],["60008","商城（6xxxx）","道具数量不足","引导弹窗","取消 / 去购买 → 对应商品"],["60009","商城（6xxxx）","现在不能使用此道具","Toast","延时卡须先用完免费时间银行；看公共牌卡须弃牌后"],["60010","商城（6xxxx）","兑换档位无效","Toast","—"],["70001","消息与内容（7xxxx）","当前无法获取内容，请稍后重试","整页","整页加载失败版式（01 第 6.4 节）"],["70002","消息与内容（7xxxx）","活动已结束","刷新","刷新活动列表"],["70003","消息与内容（7xxxx）","不符合参加条件","Toast","—"],["70004","消息与内容（7xxxx）","名额已满 / 预算用完","Toast","—"],["70005","消息与内容（7xxxx）","已领取","Toast","—"],["80001","合规（8xxxx）","已达充值上限，{日期}后可再充值","引导弹窗","知道了 / 查看设定 → 防沉迷设置"],["80002","合规（8xxxx）","冷静期中，{时间}后恢复","引导弹窗","知道了"],["80003","合规（8xxxx）","自我排除期间只能提现","引导弹窗","知道了 / 去提现"],["80004","合规（8xxxx）","冷静期与自我排除不能提前解除","Toast","—"],["80005","合规（8xxxx）","所在地区暂不提供服务","整页","—"],["80006","合规（8xxxx）","请联系客服提供资金来源证明","引导弹窗","知道了 / 联系客服"],["80007","合规（8xxxx）","已高过充值上限：{上限金额}，请重新输入","字段提示","—"],["80008","合规（8xxxx）","检测到 VPN 或代理，请关闭后再试","强制弹窗","知道了"],["90001","后台（9xxxx）","账号或密码错误","字段提示","—"],["90002","后台（9xxxx）","两步验证码错误","字段提示","—"],["90003","后台（9xxxx）","当前 IP 不在白名单","整页","—"],["90004","后台（9xxxx）","不能审批自己提交的单据","Toast","—"],["90005","后台（9xxxx）","单据已被处理","刷新","刷新单据列表"],["90006","后台（9xxxx）","建立与审核不能为同一人","Toast","—"],["90007","后台（9xxxx）","当前状态不能执行此操作","刷新","刷新商品状态"],["90008","后台（9xxxx）","商品资料不完整","字段提示","三种语言名称 / 描述、外观类预览图"],["90009","后台（9xxxx）","分成比例不能低于 15%","字段提示","—"],["90010","后台（9xxxx）","官方牌桌此项不能关闭","Toast","—"],["90011","后台（9xxxx）","此功能模块未开通","整页","—"]];
+
+/* 真人荷官模式同步：正式规格见 16 派牌管理后台，原电子模式保留。 */
+(function(){
+  {const d=window.PRD_DOCS.find(x=>x.id==="00");if(d){d.sec.push({"h": "真人荷官模式与后台职责", "li": ["新增真人荷官独立 Demo（16 派牌管理后台）：玩家手机行动、荷官手动录入底牌与公共牌、系统自动结算后荷官确认。一荷官一桌，暂停与异常由主管裁定。原电子发牌模式保持不变。牌局记录归总后台“数据中心 → 牌局记录”；稽核调查归总后台风控；派牌后台只供荷官。Demo 独立存档，不与 WAP 资金联动。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="01");if(d){d.sec.push({"h": "真人牌局异常暂停状态", "li": ["异常暂停与系统维护、普通断线分别显示。真人桌暂停时遮挡行动区，显示“此牌局异常暂停中，请稍等”，保留桌面状态和事件编号，停止行动倒数。服务端恢复前禁止发牌、下注、结算与开下一手；不公开内部调查或他人底牌。荷官台已无玩家手机模拟区，正式接 WAP 时于玩家端显示，原 WAP 暂未接入。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h": "真人荷官桌流程补充", "li": ["真人 NLH 桌采用现场手动录牌与电子行动；荷官不能替玩家下注或手输赢家。开手后逐轮底牌、翻前、烧牌确认及翻牌、转牌、河牌、自动计算、荷官确认结算。玩家行动经服务端校验并成功提交后立即生效；系统推进下一位玩家并启动其倒数。荷官无需确认玩家行动，只确认牌面与系统结算结果。非法、重复、过期（state_version 不符）的行动不推进牌局；异常暂停期间禁止行动、不推进倒数。异常先暂停留存现场，由主管裁定；结算及终止退款幂等。规则与边界见 16 派牌管理后台；原电子桌及 WAP 倒数不改。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="11");if(d){d.sec.push({"h": "真人荷官接口与事件设计（正式接入待开发）", "li": ["接口以 dealer_session、table_id、hand_id、state_version、request_id 校验一人一桌及幂等。建议操作：认领桌／释放桌、开手、提交牌面草稿／确认发牌、提交玩家行动（服务端校验通过即生效）、计算结算／确认结算、立即暂停／提交报告、主管裁定／荷官执行、获取完整快照。玩家行动与荷官牌面／结算确认必须使用不同权限；玩家行动经服务端校验并成功提交后立即生效；系统推进下一位玩家并启动其倒数。荷官无需确认玩家行动，只确认牌面与系统结算结果。非法、重复（request_id 已用）、过期（state_version 不符）的行动返回拒绝结果且不推进牌局；暂停期间拒绝行动、不推进倒数。主管裁定独立身份。事件：hand.started、cards.confirmed、action.applied、action.rejected、table.paused、incident.reported、incident.resolved、table.resumed、hand.settled、hand.voided。计时携带 server_time、deadline、remaining_ms、phase、state_version；暂停保存冻结余秒，重连取完整快照。服务器先校验版本再原子写入；重复 request_id 返回原结果，过期动作不改变牌局。底牌按角色与玩家裁剪，不广播全桌底牌。Demo 仅本地状态机模拟以上契约，无真实 API／WS。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="12");if(d){d.sec.push({"h": "真人荷官指标与事件（正式服务端待接入）", "li": ["结果型事件建议：dealer_table_opened、dealer_cards_confirmed、player_action_applied、player_action_rejected、dealer_incident_paused、dealer_incident_reported、floor_decision_submitted、dealer_play_resumed、dealer_hand_settled、dealer_hand_voided。公共字段：站点、桌号、手牌号、荷官或主管ID、事件ID、状态版本、来源、耗时；不采集明文底牌或证据文件进入普通分析埋点。指标：录牌耗时、行动确认延迟、暂停次数与时长、异常类型、更正率、结算确认时长、重复请求拦截数。本轮操作日志可演示，不等于已接服务端埋点。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="13");if(d){d.sec.push({"h": "真人荷官异常与权限边界", "li": ["稽核与异常调查集中在总后台风控。荷官可立即暂停和上报，但不能裁定争议、修改已行动牌面、自由重发或更改派奖。主管核查现场、暴露范围、行动序与证据后给出有理由的裁定；更正保留原值，恢复须荷官执行。恢复桌面不自动关闭风控调查。正式版主管独立账号，现场读取底牌受控、授权查阅与导出留痕。具体异常矩阵与公开规则参考见 16 派牌管理后台；不将 Demo 终止退款方案宣称为所有真实场况的规则。"]});}}
+  {const d=window.PRD_DOCS.find(x=>x.id==="15");if(d){d.sec.push({"h": "真人荷官暂停与恢复（正式 WAP 接入待开发）", "li": ["新增业务状态 paused_incident，不复用系统维护 00005。玩家文案“此牌局异常暂停中，请稍等。工作人员正在核查，您的筹码与已提交行动已保留，暂停期间不计算行动时间。”禁用行动、结算等控件并展示事件编号；收到恢复快照后按冻结余秒继续，已提交且校验通过的行动不得重发成新行动。玩家行动经服务端校验并成功提交后立即生效；系统推进下一位玩家并启动其倒数。荷官无需确认玩家行动，只确认牌面与系统结算结果。非法、重复、过期（state_version 不符）的行动不推进牌局。错版本、重复牌、非法阶段、未获桌归属、报告未裁定分别返回可识别业务结果；正式数字错误码待统一编排，本轮不占用或重用既有错误码。网络异常先查询原请求结果再重试。Demo 使用独立模拟面板，本轮不改变真实 WAP 页面。"]});}}
+})();
+
+;(()=>{/* 10 后台全文与 16 派牌管理后台（依 10_后台.md 第 1～11 节、16_派牌管理后台.md 整理，2021-03-29） */const a=window.PRD_DOCS;const d=a.find(x=>x.id==="10");if(d){d.title="后台";d.purpose="定义总后台与俱乐部代理后台的登录安全、权限、统一菜单、逐页筛选、资金与前台记录对照；真人荷官台见 16。";d.sec=[{"h":"1. 文档信息","t":[["项目","内容"],["产品","德州扑克 WAP"],["文档","10 后台"],["版本","v0.2"],["状态","草案"],["更新日期","2021-03-29"],["上游文档","00～09"],["原型","无"]],"li":["第 11 节为总后台与俱乐部代理后台的完整目录、逐页筛选及前台记录对照，取代旧第 11、13 节目录。","第 5 节只作为既有 Demo 业务与迁移来源；菜单命名、排序、范围有冲突时以第 11 节为准。","荷官台规格独立为 16 派牌管理后台。","文档更新不表示 Demo 已实现。"]},{"h":"修改记录","t":[["版本","日期","修改内容"],["v0.1","2021-01-08","初稿"],["v0.2","2021-04-05","更名为后台；新增第 11 节三套后台完整目录、逐页筛选、用户详情、统一授权和实施验收规格"],["v0.1","2021-01-08","新增第 7 节活动管理，原第 7～9 节顺延为第 8～10 节"],["v0.1","2021-01-08","新增第 5.1 节第三方服务、第 5.2 节邮件发送记录；第 5 节“系统”说明补上两项"],["v0.1","2021-01-08","新增第 5.3 节充值方式（银行转账 / USDT / 三方支付）；第 5 节“充提与财务”说明补上"],["v0.1","2021-01-08","依 HTML Demo 同步：第 3 节登录流程与错误码；第 4 节角色权限可配置、道具补发与活动审核权限；第 5 节模块按菜单分组排序并列出各模块页签、仪表盘与提现审核规则、页签待办数；新增第 5.4 节风控规则；第 8.1 节结算单状态与异议、8.2 节功能模块与 90011；第 9、10 节补页面与功能"]]},{"h":"2. 后台组成","t":[["后台","使用者","说明"],["总后台","平台内部人员","管理所有站点与业务（见第 5 节）"],["派牌管理后台","真人荷官","开桌、手动录牌、确认牌面与结算、暂停上报（见 16 派牌管理后台）"],["代理后台","包网商户、合作代理（以标签区分）","见第 10 节"]]},{"h":"3. 登录安全","t":[["步骤","规则"],["1 账号密码","账号或密码错误显示 90001；IP 不在白名单整页显示“当前 IP 不在白名单”（90003），请超级管理员加入白名单后重新登录"],["2 验证器 App","输入 6 位数字验证码；错误显示 90002"],["登录后","顶栏显示账号、角色、两步验证已通过、IP（白名单内）、登录时间与“退出登录”；每套后台记住所在页面"],["合作代理","账号未被标记为合作代理时不能登录代理后台（00004），提示一般俱乐部主使用 WAP 的俱乐部管理"],["示范账号（Demo）","三套后台登录卡下方可展开“示范账号”：密码统一 123456、验证码通用 000000（各附“复制”按钮）；点账号即复制并带入账号与密码。总后台：root、ops_amy、fin_bob、risk_cara、cs_dan；荷官：dealer_01、dealer_02；代理：m001_admin、partner_agent；每个账号附权限说明。仅此卡片可选字 / 右键复制，其他页面维持防护"]],"li":["账号密码 + 验证器 App 两步验证 + IP 白名单。三套后台（总后台 / 派牌管理后台 / 代理后台）各自登录。"]},{"h":"4. 权限","t":[["项目","规则"],["账号与权限","只有超级管理员能新增、删除后台账号，并管理角色权限"],["角色","运营 / 财务 / 客服 / 风控，按权限执行各自业务（见下表）"],["角色权限设定","预设为下表；超级管理员可在“系统 → 角色权限”按操作逐项勾选各角色权限，或“恢复预设权限”"],["两人复核","动钱的操作（人工补发、调整余额、冷钱包调拨、道具补发）由一人提交、另一人批准；提交人本人不能批准。配置类中动钱或合规的参数同样两人复核：抽水封顶与兑现上限、赛事奖励分配、Jackpot 规则、彩金池人工调整、官方赛事新增与资金栏位修改、VIP 门槛与返水、防沉迷选项、VPN 白名单"],["配置编辑","配置页一律可编辑（超级管理员必可，其他角色依权限表）；统一流程：表单校验 → 确认弹窗列出改前 / 改后 → 直接生效或进入两人复核；所有修改记入操作日志（含改前改后值）。商户月结单、结算单等按流水统计的数据不可修改，标示“系统自动统计”"],["操作日志","所有操作留存日志"],["角色","权限"],["超级管理员","全部；后台账号与角色权限、系统维护开关、系统参数、风控规则启用 / 停用、商户收费设定、商户功能模块开关、新建站点只有超级管理员能操作"],["财务","充值订单处理、提现审核与打款、对账、提交 / 批准人工调整余额、冷钱包调拨、商户账单复核、道具补发的批准、分成结算入账"],["风控","账号冻结 / 解冻、实名认证人工复核、风控告警处置、分成周结复核与追回、异常牌局标记"],["运营","商品（建立与审核须不同人员）、道具补发提交、内容（Banner、公告、扑克焦点）、赛事封面、俱乐部设定（创建数量、合作代理、头像审核、关闭 / 恢复）、活动管理（建立与审核须不同人员）"],["客服","用户与订单查询、工单、邮件发送记录查询；可提交人工调整与道具补发，须他人批准"]],"li":["没有权限的操作显示 00004。"]},{"h":"5. 总后台模块","t":[["#","分组","模块","页签 / 功能","规则来源"],["1","概览","仪表盘","站点与期间（近 7 / 14 / 30 天）筛选；待办与告警（点击跳到对应页）；北极星（每日活跃付费玩家数）、今日 GGR、充值成功率、待审核提现、活跃牌桌数、座位占用率、首充率、次日留存；活跃付费玩家数与 GGR 柱状图","12"],["2","用户与合规","用户","按用户 ID / 昵称 / 邮箱查询；详情、登录记录、冻结 / 解冻、标签、游客账号","02、13"],["3","用户与合规","实名认证审核","服务商结果、查看证件（证件 / 自拍左右比对，证件已打码）、人工复核（比对弹窗内直接通过 / 拒绝并选原因；服务商疑似的单以拒绝为主按钮）","02 第 7 节"],["4","资金","充提与财务","充值订单 / 提现审核 / 人工调整余额 / 渠道与费率 / 冷热钱包与对账；Demo 订单“设为成功 / 设为失败”、充值方式与银行转账核对（见第 5.3 节）","03、本文第 5.3 节"],["5","资金","商户 / 站点","商户结算 / 收费设定 / 站点列表（新建站点）/ 功能模块","00 第 5.1 节、本文第 8 节"],["6","业务","俱乐部","俱乐部列表（关闭 / 恢复）/ 合作代理与创建数量（默认 5）/ 分成周结与追回 / 头像人工审核","06"],["7","业务","牌桌与赛事","盲注级别与抽水封顶 / 赛事模板与奖励分配（含封面）/ 官方现金桌 / 私人桌（关桌 / 重新开桌）/ 官方赛事 / Jackpot 池 / 新人局与机器人（只读）","04、05、07"],["8","业务","商品与商城","商品列表 / 发放 / 补发 / 订单 / 钻石汇率","本文第 6 节、14"],["9","业务","VIP 与活动","等级表与返水（每周结算）/ 活动管理","09 第 10 节、本文第 7 节"],["10","业务","内容","Banner / 公告 / 个人消息 / 扑克焦点 / 添加到桌面素材 / PC 落地页 / 服务条款与隐私政策（按站点与语言）","01、08"],["11","风控","风控","告警（严重度、对象、不当得利、处置）、规则（见第 5.4 节）","13"],["12","报表","数据报表","营收 / 用户 / 牌局 / 赛事 / 商城（金额单位 USDT，含合计）","12"],["13","系统","系统","系统设置（维护开关、验证码参数、后台账号、角色权限、操作日志）/ 第三方服务 / 邮件发送记录","01、02、本文第 4、5.1、5.2 节"],["模块","规则"],["用户","冻结：余额保留，不能提现或使用；现金桌当前这一手结束后离桌结算；进行中赛事电脑代打到结束；未开赛报名取消并全额退款；被冻结的创建者不能开新局；解冻须经风控审核（见 13）"],["提现审核","一般订单由风控自动通过；单笔 ≥ 5,000、账号第一次提现、风控规则命中时转人工审核（审核通过 / 拒绝 → 打款成功 / 打款失败）；拒绝或失败时冻结金额退回可用余额"],["人工调整余额","用户 ID、类型（补发 / 扣减）、金额、原因必填；扣减不得超过可用余额；提交前确认弹窗显示“可用余额 当前 → 调整后”，单笔 ≥ 5,000.00 标红提醒；提交后待他人批准"],["冷热钱包","显示热钱包水位（上限 100,000 USDT）与冷钱包余额；热钱包超过上限自动转冷钱包；人工调拨须两人复核；每日对账显示通道入账、系统入账与差异"],["公告","标题、内容、语言、受众（全部用户 / 正式账号 / 游客）、定时发布（选填，不填立即发布）；发布后推送至前台消息中心“官方公告”"],["内容管理（通用）","内容 › 个人消息 / 扑克焦点 / PC 落地页 / 服务条款与隐私政策 / 添加到桌面素材：列表可按站点、状态、显示语言、关键字筛选，分页 50 / 100 / 200；新增 / 编辑须填简中、English、繁中三语（全部必填，有字数上限；English 上限为中文的 2 倍），先预览再确认；前台按当前语言直接显示该语言原文；种子内容前后台共用，重置示范数据时重建；按站点管理（全部站点 / 各站）；可启用 / 停用、上下线时间（个人消息为发送时间）、上移 / 下移排序、删除；操作日志记改前 / 改后"],["PC 落地页","主视觉图、主标题、扫码标题、介绍文案、下载 / 添加到桌面引导（三语）；web.html 取上线中排序第一笔，跨分页即时更新（见 01 第 4.1 节）"],["服务条款与隐私政策","文件（服务条款 / 隐私政策）、版本号（v1 / v1.2 / v1.2.3，同站点同文件不能重复）、生效日期、标题与全文三语；前台条款弹窗与 PC 落地页显示上线中排序第一份，标注版本号与生效日期"],["添加到桌面素材","主视觉图、标题、副标题、iOS Safari 步骤、Android Chrome 步骤（每行一步）、按钮文字（三语）；前台“添加到桌面”弹层与“我的”快捷入口的使用指南读取上线中第一笔；同页另管教学视频"],["扑克焦点","分类：教学 / 俱乐部动态（08 第 10 节）；封面、标题、摘要、正文三语；前台首页取排序前 3 则、列表与详情同源"],["个人消息","对象：全部用户 / 指定站点 / 指定用户 ID（6 位）；发送时间留空即时发送、可排程；状态：已发送 / 待发送 / 已停用（停用即从前台撤回）；发出后进前台消息中心“信息”页签，计入未读角标，跨分页即时同步；英文 / 繁中按所填三语显示"],["系统设置","维护开关经二次确认弹窗开启，开启后后台顶部显示红色“系统维护中”横幅，前台任何操作显示 00005；验证码参数：有效期 1～30 分钟、重新获取间隔 1～600 秒、可输错次数 1～10；后台账号可改角色、停用 / 启用、重置两步验证"]],"li":["> 本节记录既有 Demo 模块与业务规则；目标菜单和逐页筛选以第 11 节为准。","仪表盘“待办与告警”随站点下拉切换（全部站点 = 各站加总；前台账号的充提与实名属示例站 BR）；点待办卡跳转的列表带上该站点筛选（列表顶部显示“站点筛选：xx”，可点“显示全部站点”清除；从菜单进入不带筛选）。左侧菜单角标与页签数字固定为全平台合计，不随站点切换。左侧菜单为两级：仪表盘为独立一级，点击直接进入；用户与合规、资金、业务、风控、报表、系统为一级分组，点击展开二级（▾），再点同一组收起（▸），可多组同时展开；当前页所在组默认展开并高亮，收起时一级显示组内角标合计；展开状态刷新后保留（每套后台各自记忆）。代理后台与总后台同一份菜单定义，一级 / 二级与收合方式相同，按标签与已开通模块过滤（见第 10 节）；派牌管理后台采用单桌荷官操作台，流程见 16 派牌管理后台。有待办的模块显示数字角标（充提与财务 = 提现待审核 + 人工调整待审批 + 充值待处理；实名待人工复核；风控待处理告警；分成待复核 / 暂缓；商品待审核；活动领奖待审核），与仪表盘“待办与告警”同一来源，角标数字同时落在对应页签上。无权限的操作按钮直接置灰，不可点击。内容区顶部显示面包屑（后台 › 页面 › 子页签）。数据报表每个页签含明细（可选近 7 / 14 / 30 天）、合计行（与明细同栏对齐）与趋势图；数值栏一律右对齐。","共用关闭：三套后台所有抽屉与弹窗右上角统一为 ✕ 图标按钮（热区 32px，aria-label“关闭”）；Esc 先关弹窗、再关抽屉，点遮罩可关闭。","共用列表：所有列表支持任意栏位筛选、点栏位排序、分页与汇出 CSV。分页列在表格底部，依次为上一页、页码、下一页、共 N 条，再加每页条数 50 / 100 / 200（默认 50）；切换每页条数后回到第 1 页，筛选与排序保留；资料不足一页时仍显示分页列与总数。三套后台（总后台 / 派牌 / 代理）一致。","各模块要点"]},{"h":"5.1 系统 → 第三方服务","t":[["项目","规则"],["主用与备用","每个服务可配主用 + 备用服务商，主用失败自动切备用"],["邮件","服务商（示例：服务商 A / B）、发件人名称与地址、API 金钥（遮罩显示）、邮件模板（验证码 / 新增通行密钥通知）按语言；“发送测试信”钮"],["KYC","服务商、启用站点（沿用站点模板）"],["支付通道","已在“充提与财务 → 渠道与费率”，这里只链接"],["第三方登录","Google / Facebook / Apple 启停与客户端 ID（遮罩）"],["IP 信誉服务","主用 / 备用服务商；检测 VPN / 代理 / 机房 IP，供“VPN / 代理检测”规则使用"],["状态","每个服务显示状态（正常 / 异常）、近 24 小时成功率"],["修改","须二次确认并记入操作日志"]],"li":["只有超级管理员可修改。"]},{"h":"5.2 系统 → 邮件发送记录","t":[["项目","规则"],["栏位","时间 / 邮箱（遮罩）/ 用途（注册、登录、提现、收款账户…）/ 服务商 / 状态（已送达 / 失败 / 已使用 / 已过期）/ 验证失败次数 / IP"],["筛选","可按邮箱、用途、状态、日期筛选，可汇出 CSV；不显示验证码明文"],["权限","客服可查（用户反映收不到信时查询），其余管理员只读"],["系统参数","现有“验证码有效期 / 重发间隔 / 错误次数”参数保留在系统参数"]]},{"h":"5.3 充提与财务 → 充值方式","t":[["项目","规则"],["充值订单列表","加“方式”栏与按方式筛选；“实际到账”只在订单成功后显示，其余状态显示“—”；无订单时显示“暂无充值订单”"],["银行转账订单","状态“待核对”；列表显示附言、付款人；核对弹窗显示收款账户、附言、付款人、实名姓名、转账截图；财务可“确认到账”或“驳回”；驳回须选原因（选项引用 15 错误码 20015 文案“付款人姓名与实名姓名不一致，已驳回，款项将原路退回”）；确认到账后入前台余额；列表按建立时间倒序"],["方式启用开关","“渠道与费率”页三种方式各自启用开关，关闭的前台不显示"],["三方支付通道","通道 A / B 的限额与手续费可配"],["平台收款账户","银行转账可配平台收款账户（银行、户名、账号），可多个，轮流分配；账号完整显示（与前台订单页一致）"],["限额与费率表","充值渠道列：银行转账 / USDT-TRC20 / USDT-ERC20 / 三方支付各通道（限额与手续费读通道设定）"]],"li":["充值分为银行转账 / USDT / 三方支付三种方式。"]},{"h":"5.4 风控 → 规则","t":[["规则","阈值","动作"],["伙牌","账号关联 + 牌局行为分析","告警"],["筹码对倒","反复大额输给同一人","告警"],["机器人 / RTA","决策速度、胜率异常","告警"],["俱乐部赛事取消率","近 30 天 > 30%","告警，分成暂缓"],["大额提现","单笔 ≥ 5,000","转人工审核"],["VPN / 代理检测","IP 信誉服务判定为 VPN / 代理 / 机房 IP（白名单放行）","登录、现金桌、赛事、新人局拦截（80008）"]],"li":["VPN / 代理白名单（风控 › VPN / 代理白名单）：列出 IP / 网段、用途备注、到期日、添加人与时间；新增、删除须一人提交、另一人批准（提交人不能批准自己），全部记入操作日志；到期后显示“已过期”。前台读取的数据：localStorage poker_vpn = {enabled, whitelist:[{ip, note, expire, by, at}]}，由后台写入（规则启停写 enabled，批准后写 whitelist）；待批准申请另存后台数据，不进 whitelist。","规则启用 / 停用只有超级管理员能操作，留存操作日志；阈值调整须两人复核。","告警处置：冻结账号、没收不当得利、复核通过恢复分成、追回分成、暂缓俱乐部分成、标记无异常。告警处置的冻结与用户页冻结为同一弹窗：原因必填，原因写入操作日志。没收的不当得利按受影响牌局中各玩家的损失比例退还，无法认定受害人的部分归平台。"]},{"h":"5.5 用户记录与记录查询","li":["单手详情与回放：点牌局编号（记录查询、用户详情、代理后台查看记录、观看的上一手、牌桌回放列表）；前台手牌有完整记录时同样显示，旧记录只有文字说明时显示文字版；在总后台直接打开完整单手详情，不依赖派牌后台：版面单栏由上而下——①标题列（牌局编号、桌名、盲注、时间、发牌方式，吸顶）②公共牌与回放控制（吸顶）③玩家表（每人一行：座位、位置、玩家、带入、底牌、牌型、投入、收回、净变化；9 人桌即 9 行，当前步骤行动者整行高亮）④各街行动表（按街分组，组标题显示该街公共牌与开始底池；每个动作一行：顺序、位置、玩家、动作、金额、动作后底池；回放到的那一步高亮，尚未播到的变淡）⑤结算（最下方整宽：池表、抽水、Jackpot、全押兑现、核对）；关闭按钮固定在弹窗底部。内容包含：座位与庄位、带入、各街行动与每街底池、公共牌随回放逐步出现、主池 / 边池、抽水、Jackpot 注入、全押兑现、每位玩家投入 / 收回 / 净变化与核对（投入 = 赢得 + 抽水 + Jackpot 注入）；未被跟注的筹码退回原主时单独显示为一步“退回 玩家 金额”；回放可播放、暂停、上一步 / 下一步、跳到开头 / 结尾。底牌默认隐藏（摊牌者于最后一步显示），风控 / 超级管理员可切换“显示底牌”，每次切换记入操作日志。","列表筛选：不设“任意栏位”自由筛选；表格依栏位提供具名筛选（日期栏为区间、固定值栏为下拉、ID / 单号 / 名称类为关键字），页面另有专属筛选列者沿用专属筛选，上方已有的栏位不在筛选列重复出现；ID / 昵称 / 名称 / 单号类栏位一律用输入框，不做下拉；状态等固定值栏位按栏位定义列出全部选项（资料里没有的也列）；单笔限额、费率等数值栏用“最小 ~ 最大”范围筛选（与区间有交集即列出，“不限”视为无上限）；“已开通 / 未开通”类栏位固定为 全部 / 开通 / 未开通；每组栏位名与控件一起换行，“汇出 CSV”固定在右侧；一张表只有一个“重置”。用户管理：用户 ID、昵称、邮箱分开查询（可组合、可重置），筛选列只有 VIP 等级（VIP 0～最高级逐级、可多选）、标签、状态（正常 / 已冻结）、注册日区间，“重置”同时清空三框与筛选；用户详情显示所属俱乐部（名称、ID、身份、加入日期、状态，可跳俱乐部管理）。","表格：所有后台表格在卡片内横向卷动；表格超出宽度时上方显示“可左右卷动”提示，操作栏固定在最右侧（紧邻的状态类栏位——状态、稽核、审核状态、发放状态、结算状态等——一起固定），固定栏左侧有分隔线与阴影。","编号复制：三套后台凡显示牌局编号、充值 / 提现 / 返水 / 奖励等单号、用户 ID 之处（只限业务编号；遮罩金钥、客户端 ID、收款账号、附言、IP 不加），编号右侧有复制图标（点击范围 24×24，hover 提示“复制 编号”）；点编号照旧打开详情，点图标只复制编号、不打开详情，成功显示 Toast“已复制”。复制使用剪贴板 API，不可用时改用备用复制方式。","用户详情的“记录”页签与前台“我的 › 记录中心”同名、同数据源，共 7 项：牌局记录（含单手回放）、赛事记录、返水记录、充值记录、提现记录、奖励记录、商城订单；页签下另列登录记录。按时间倒序；无资料显示“暂无记录”。","用户与合规 › 记录查询（不必先选用户）：同样 7 个页签，各页专属筛选——共通：用户 ID / 昵称、时间区间；返水 / 充值 / 提现 / 奖励 / 商城另加单号，返水 / 充值 / 提现另加状态；牌局另加牌局编号、牌桌、盲注；赛事另加赛事名称；奖励另加“奖励类型”（只列类型：活动奖金、VIP 升级奖励、签到奖励等，活动名称另一栏显示）；商城另加订单类型。分页 50 / 100 / 200、汇出 CSV；单号、牌局编号可点开详情。","充值、提现记录待处理的单据显示“前往处理”，连到“充提与财务”的充值订单 / 提现审核。","资金 › 资金流水（对账）：放资金组最后，只作财务对账汇总（按流水类型统计笔数、收入、支出、净额，可按时间区间），明细请到记录查询。","显示格式：支付方式显示中文名称（银行转账、USDT-TRC20 等）；牌局编号统一为“H + 8 位日期 + 4 码”（如 H202103290115；前台手牌以时分为 4 码，如 H202103291020），电子牌局的后台观看与记录显示保持一致；真人荷官桌使用 T + 8 位 Demo 日期 + 4 码当日流水（如 T202103290001，见 16 派牌管理后台），旧 LH 编号自动迁移。旧存档编号自动迁移：目标编号已被占用时同日 4 码递增改用空号，异常调查记录随编号一一对应。","权限：查询均为只读；财务只看资金类（返水、充值、提现、奖励、商城订单，不显示牌局、赛事与登录记录）；客服、风控、运营看全部（运营待 PM 确认）。","种子资料：前台账号以外，Lucky7（100045）、RiverRat（100078）、BluffKing（100102）、Sam（100156）及合作代理俱乐部成员 BigBlindBen、FlopQueen 有少量记录；牌局取总后台「记录查询 → 全桌牌局记录」中该玩家参与的手牌。另有 MX / PH 站非前台用户的待处理充值、待审核提现，批准 / 驳回只改订单状态，不动前台钱包。"]},{"h":"5.6 系统 → 业务参数与其他配置入口","t":[["项目","位置","规则"],["维护通知","系统 › 业务参数","维护说明（简中，填写时须附英文）与预计恢复时间（YYYY-MM-DD HH:MM，UTC-3），前台维护页显示；只有超级管理员可改；日志记改前 / 改后内容"],["收款账户上限","系统 › 业务参数","银行账户 / USDT 地址各最多 N 个（预设 3，03 第 6 节）；只限制新增"],["俱乐部分成等级","俱乐部 › 分成等级","00 第 7.4 节七级门槛与比例；门槛逐级递增、比例 0～100；前台“报表与分成”即时套用"],["站点模板","商户 / 站点 › 站点列表 › 编辑模板","时区、实名证件类型（至少一种）、地区限制；费率参数链接到盲注抽水与渠道费率页；只有超级管理员可改"],["VIP 门槛与返水","VIP 与活动 › 等级表与返水","可改各级门槛与返水比例，须一人提交、另一人批准后生效，前台即时更新"],["教学视频","内容 › 添加到桌面素材","上传 MP4 / WebM / MOV 替换前台教学视频"],["防沉迷选项","系统 › 业务参数","时长提醒间隔、冷静期、自我排除的可选项（13 第 4 节预设）；两人复核"],["聊天快捷语","牌桌与赛事 › 聊天快捷语","见下"]],"li":["聊天快捷语：快捷语三语文案（简中 / English / 繁中，均必填）、排序（上移 / 下移）、启停、新增、编辑、删除；表情总开关与单个表情启停。表情：每个表情有三语名称，可拖曳排序、启停；系统内建 emoji 只能停用不能删除；可“+ 新增表情”上传 GIF / PNG / WebP（单档 ≤ 500 KB，超过不能提交；建议 128×128 方形，不符时提示但可提交），上传后预览动画，须另一人复核通过才上线；自订表情可删除。前台牌桌与观战聊天读同一份设定，GIF 自动播放；图片以 Blob URL 显示并加防护遮罩、禁拖曳。所有变更记入操作日志；前台牌桌聊天按排序显示已启用项目，按前台语言取文案，修改后即时生效。","所有修改均记入操作日志（含修改前后值）。"]},{"h":"5.7 牌桌与赛事 → 配置","t":[["页签","可设定项目","复核"],["盲注级别与抽水封顶","各级别抽水封顶、全押兑现单手上限（05 第 5 节）；6+ 短牌即将开放，沿用 PRD","两人复核"],["赛事模板与奖励分配","6～100 人各档奖励比例（合计 100%、名次越前不低于后一名）；超过最大分档时（表格写“最大分档上限 + 1 以上”，预设“101 以上”，与前台一致）的获奖比例（1～50%，预设 15%）与第 1 名奖金上限（10～100%，预设 30%），存 bizCfg.prizeBig = {pct, cap}；SNG 65 / 35 沿用 07","两人复核"],["官方现金桌","带入范围（BB，预设 100～500，AoF 固定 10BB）；开桌 / 关桌","确认后生效"],["官方赛事","新增（先选模板 MTT / SNG / 赏金赛 / 卫星赛，多阶段即将开放）：名称、封面、报名金额、服务费（预设 10%）、保底、开赛时间（SNG 坐满即开）、最低人数、延迟报名级别、重进次数与级别、卫星赛关联主赛；开赛前可编辑、可取消（见 07 第 8 节）；前台赛事列表即时同步","新增与报名金额 / 服务费 / 保底修改两人复核；其余确认后生效"],["Jackpot 池","整体启停；注入条件（底池 ≥ N BB，预设 30）与注入额（6 人桌 1BB、9 人桌 0.8BB），可按级别覆盖；NLH 触发牌型（预设 AAATT 及以上被击败）；派奖比例（冤家牌方 10% / 胜方 3% / 其他每人 0.8%）（05 第 12.1 节）","两人复核"],["彩金池余额","不能直接修改，只能人工调整（金额、原因），调整后不能小于 0","两人复核"],["新人局与机器人","倒数秒数（预设 15）、凑满人数（2～6，预设 6）、剩几秒补机器人（预设 5）、是否替换机器人（04）","确认后生效"],["栏位","范围"],["官方赛事","名称中文 ≤ 30 字、英文 ≤ 60 字；报名金额 0.01～100,000（报名金额、服务费、保底须为最多两位小数的数字，存储时四舍五入到两位）；服务费 0～报名金额；保底 0～1,000,000；开赛时间晚于现在至少 30 分钟、不超过 90 天；最低人数 6～500（07 第 6 节；卫星赛不少于门票名额所需人数）；延迟报名级别 0～盲注表级数（10）；重进 1～5 次、截止级别 1～10"],["新人局","倒数 5～60 秒；凑满人数 2～6；补机器人 1～倒数减 1 秒"],["抽水封顶 / 兑现上限","封顶 0～10BB；兑现上限 1～1000BB"],["官方桌带入","最低 10～500BB；最高大于最低且 ≤ 1000BB"],["Jackpot","注入条件 1～200BB；注入额 0.1～5BB；派奖比例各 0～50%，合计（含 7 位其他玩家）≤ 100%；彩金池调整绝对值 ≤ 1,000,000、最多两位小数"],["防沉迷","时长提醒 5～240 分钟、最多 6 个、默认值须为选项之一；冷静期 1～365 天；自我排除 30～3650 天或永久"],["其他","收款账户上限 1～10；分成等级门槛 ≤ 1,000,000,000、比例 0～50% 且逐级不降；VIP 门槛 ≤ 10,000,000、返水 0～50% 且逐级不降；维护说明 ≤ 200 字、恢复时间须晚于现在；快捷语中文 ≤ 20 字、英文 ≤ 40 字且不能与现有重复"],["项目","规则"],["列表","列出进行中、未开赛、已结束、已解散、已取消（官方赛事默认显示全部，已取消列出时间、原因与退款笔数；牌桌默认只显示进行中）；未开赛的赛事不能观看；关桌后该桌改为“回放”。筛选：状态、玩法、盲注级别、俱乐部、站点、时间区间、ID / 名称关键字、玩家（参与过该桌）；分页 50 / 100 / 200、汇出 CSV"],["观看","进行中一行显示“观看”：只读牌桌（座位、昵称、筹码、下注、底池、公共牌、当前行动与倒数、本手行动记录），即时更新。前台玩家所在牌桌直接显示该玩家的即时画面；其他牌桌以同一牌局引擎即时推进，每手结束写入总后台「记录查询 → 全桌牌局记录」。后台身份不入座，不出现在玩家观战名单"],["底牌","默认不显示；风控 / 超级管理员可切换“显示底牌”，每次切换记入操作日志"],["赛事","显示级别与升盲倒数、剩余人数、奖池（含保底）与奖励名次、各桌列表，点任一桌观看"],["跳转","玩家昵称连到用户详情；可开总后台全桌牌局记录的手牌详情、查看上一手记录"],["操作","依权限：暂停 / 恢复、关桌（确认）、请玩家离桌（确认，本手结束后离桌结算）；对前台玩家牌桌同步生效；均记入操作日志"],["回放","已取消的赛事显示“详情”（列状态、取消信息、报名与退款）。已结束一行显示“回放”：现金桌列出逐手记录（点牌局编号看行动与结算）与底池、抽水合计；赛事列出状态、取消信息、奖池与报名名次 / 退款"]],"li":["防沉迷选项（时长提醒间隔与默认值、冷静期、自我排除）在“系统 › 业务参数”，属合规参数，两人复核后前台“防沉迷设置”即时套用。","输入范围（Demo 暂定，待 PM 确认）（PRD 未写的由后台订定，均有校验，选项不能重复）：","复核：批准 / 驳回前弹确认列出改前 / 改后；日志以文字记录（如“0.25/0.5：底池 ≥ 25BB，注入 2 / 1.2BB”）。仪表盘“待批准配置”待办卡汇总所有待复核项目（配置、VIP、VPN 白名单、聊天表情），点击进入“待批准配置”页再前往处理。","观看与回放（私人桌、官方现金桌、官方赛事）："]},{"h":"6. 商品管理"},{"h":"6.1 建立商品","t":[["字段","规则"],["商品 ID","系统自动产生"],["名称 / 描述","英文、简体中文、繁体中文三种语言"],["类型","外观 / 功能卡 / 延时卡"],["子类型","头像框 / 牌背 / 桌布 / 改名卡 / 看公共牌卡 / 延时卡"],["素材","图标、预览图（外观类需提供预览效果）"],["字段","规则"],["售价","钻石"],["原价 / 折扣","选填，用于促销"],["限购","每人总限 / 每日限（选填）"],["上架 / 下架时间","定时；不填则手动上下架"],["适用站点","选择在哪些站点售卖"],["排序 / 标签","新品 / 热卖 / 限时"],["字段","规则"],["有效期","永久 / 购买后 N 天"],["可叠加","是（数量型，如延时卡）/ 否（拥有型，如头像框）"],["使用限制","延时卡：只用于现金桌，每手最多 1 张；改名卡：仍受 02 第 6 节昵称规则限制"],["转让退款","不可转让、不可退款"]],"li":["基本资料","售卖","使用规则"]},{"h":"6.2 状态","li":["`","草稿 → 待审核 → 审核通过 → 已上架 → 已下架","`","建立与审核由不同人员执行。","已上架的商品修改价格或规则，须重新审核。","已售出的商品依购买当时的规则，不受后续修改影响。"]},{"h":"6.3 发放","t":[["来源","规则"],["购买","见 14"],["活动奖励","见本文第 7 节"],["VIP 升级奖励","依运营活动配置（见 09）"],["人工补发","两人复核"]]},{"h":"6.4 钻石","li":["在后台设定余额兑换钻石的汇率；兑换规则见 14。"]},{"h":"7. 活动管理","li":["通用模板 = 对象 + 触发条件 + 奖励规则 + 领取方式 + 限制。"]},{"h":"7.1 模板","t":[["项目","规则"],["对象","全部正式账号 / VIP 等级区间 / 注册 N 天内（游客不可参加）"],["触发条件","首充 / 第 N 笔起充值 / 签到 / 被邀请人首充达标 / 当期贡献达标 / 任务完成（人工审核）"],["奖励规则","固定金额 / 充值比例（含单笔上限）/ 阶梯（第 1～7 天）"],["奖励物","USDT / 钻石 / 道具"],["领取方式","自动入账 / 活动页手动领取（有效期 7 天）/ 人工审核后入账"],["限制","每人次数（每日 / 每周 / 活动期）、总预算（用完不结束：后台标“预算已用完”，前台标“名额已满”，参加时 70004）"],["流水","USDT 奖励加 N 倍流水（默认 1 倍，同 03 第 5.4 节流水规则）"]],"li":["预设模板","预设 4 个模板：首存优惠、再存优惠、每日签到、邀请好友。","分享 / 点赞 / 评论 = 任务完成 + 人工审核。","其他活动用通用模板自由组合。"]},{"h":"7.2 状态","li":["`","草稿 → 待审核 → 未开始 → 进行中 → 已结束","`","建立与审核须不同人员。","进行中只能提前结束、加预算，不能改规则。"]},{"h":"7.3 参加与风控","t":[["项目","规则"],["同时参加","首存与再存互斥；充值时可选“不参加优惠”（见 03 第 4 节）"],["风控","同设备 / 同 IP 多账号领奖进风控告警"],["提现","奖金在补齐流水前提现加收 5%（同 03 第 5.4 节现行规则）"]]},{"h":"7.4 后台栏位","t":[["项目","内容"],["列表栏位","活动名称 / 类型 / 时间 / 对象 / 状态（预算用完另标“预算已用完”）/ 参加人数 / 已发金额，可筛选"],["共用栏位","名称、Banner 图、上下线时间、对象、奖励、流水倍数、总预算、每人上限、规则说明"]],"li":["活动名称须填简中、English、繁中三语（前台活动中心按当前语言显示后台原文）。商户活动：代理后台“业务 › VIP 与活动 › 活动管理”可选模板建立（同本节栏位），保存草稿后“提交审核”，由平台运营于总后台活动管理审核（列表标“商户 M001”），通过后依上线时间进行，只在该商户站点（示例站 BR）显示。"]},{"h":"8. 商户（包网）"},{"h":"8.1 结算","t":[["项目","规则"],["收费方式","开站费 + 净营收分成 + 保底月费；分成与保底月费取较高者"],["分成比例","后台按商户设定，默认 20%，最少 15%"],["净营收","GGR − 扣除（见下方公式）"],["周期","每月结算"],["项目","规则"],["列表","按商户、结算月份、状态筛选；栏位：结算月份、商户、站点、GGR、扣除、净营收、分成比例、保底月费、平台应收、状态"],["详情","只读抽屉：GGR 与扣除各项、净营收、上月结转、净营收分成、保底月费、平台应收（取较高者）、结转下月抵扣"],["状态","草稿 → 财务复核 → 已发送商户 → 已结清；财务复核可退回草稿"],["平台应收","max（计费基数 × 分成比例，保底月费）+ 开站费（开站当月）+ 已开通模块月费；计费基数 = 当月净营收 + 上月结转（负数）"],["商户端","代理后台“与平台的结算”与总后台结算单为同一份账单，金额与算式一致；可“提出异议”；代理后台“报表”只显示本站数据，按日列出当月 1 日至今并附合计行，合计 = 结算单净营收"]],"li":["开站费与保底月费的金额按商户在总后台“收费设定”设定。","结算单","净营收公式","`","GGR    = 抽水 + 赛事服务费 + 全押兑现手续费 + 商城 + 充提手续费 + 汇差","扣除   = 俱乐部分成 + VIP 返水 + 活动奖金 + 全押兑现平台输赢 + 支付通道费 + 博彩税","净营收 = GGR − 扣除","`","Jackpot 注入是玩家的钱，不计入（见 00 第 6.1 节）。","牌照费属固定费用，由商户自行承担，不进公式。","当月净营收为负时，结转下月抵扣；保底月费照收。"]},{"h":"8.2 客制化","li":["总后台按商户开关功能模块：建立商品 / 自定义活动 / 多阶段赛事，标准版默认不开启。","按开启的功能模块加收月费（建立商品 800、自定义活动 500、多阶段赛事 600 USDT / 月）。商户访问未开通的模块显示“此功能模块未开通”整页（90011，画面不显示错误码；菜单标示锁头）。","商户建立的商品只在自己的站点售卖，上架前须经平台审核。"]},{"h":"9. 派牌管理后台独立文档","li":["荷官台规格已独立为 16 派牌管理后台，本文不再两处维护。","荷官只负责本桌操作；历史牌局归总后台“数据中心 → 牌局记录”，异常与稽核归风控。"]},{"h":"10. 代理后台定位","li":["俱乐部代理以总代、一级代理两层为限，各自可以是俱乐部创建者；本人钱包与自己的俱乐部经营数据分别授权。","普通创建者不自动成为代理，其WAP钱包和经营查询仍必须完整。","包网商户为独立身份，不作为俱乐部代理默认菜单。","逐页目录、授权范围、前台映射与 PM 定案事项统一见第11节。"]},{"h":"11. 总后台与代理后台统一目录、筛选与前台对应","p":"本节是总后台与俱乐部代理后台的统一目录，逐页列出输入查询、筛选、代理可见范围与前台 PRD 对应。"},{"h":"11.1 先分清账号与资金","li":["同一个人可以是玩家、俱乐部创建者、总代或一级代理；钱包绑定站点内 user_id，不按页面再造一份「代理余额」。代理登录须明确绑定本人 user_id，禁止依前台当前玩家或固定100078回退。","创建者必须能查询本人完整钱包与记录，包含充值、提现、保底占用、差额扣除、释放、分成入账及追回。先前把合作代理的钱包一律列为“不开放”不准确：禁止的是其他成员或下级的个人全站钱包，不是本人钱包。","俱乐部收入报表不等于俱乐部独立钱包；现行00/03规定平台统一托管，保底从创建者本人钱包占用，不能虚构俱乐部上下分、代充值、代提现。","总后台按职务权限查全平台；代理有本人私有数据、本俱乐部业务数据、获授权的直属下级经营汇总三个不同范围。上级关系不自动授予下级个人钱包或成员私人记录访问权。","普通创建者不是自动成为代理。旧06允许达标玩家创建，旧10不允许普通创建者登录代理后台：其WAP钱包及经营记录仍须完整提供，总后台仍须可查；普通创建者先不开Web经营台入口（PM 定案 2021-03-29），不能为查记录强制变为代理。"]},{"h":"11.2 开局与钱包核对","t":[["操作","原PRD条件","必须可查的记录与金额"],["创建俱乐部","06§3：实名＋累计流水5000，合作代理免流水；最多5家可配置；未定义创建扣费","创建资格、实际流水、限额、创建成功／失败原因；不凭空扣钱包"],["创建私人现金桌","06§8：仅创建者、俱乐部开放、可用余额须大于0、20桌上限；不收开桌费、不占用资金","开桌请求、规则快照、创建者、时间、结果；创建者自己入座时另走带入扣款"],["创建普通赛事","06§8.2／07：仅创建者、模板、10场上限；可用余额须大于0；无保底不冻结资金","创建与取消、报名服务费、奖池、退款、结算；不是从创建者钱包支付所有玩家报名费"],["创建保底赛","可用余额≥保底金额；确认显示占用后可用；不足20001；负余额20008","保底单、创建者user_id、club_id、赛事ID、保底金额、可用转占用、差额扣除、剩余释放"],["保底结算","00§7.3／07§14：按实际奖池承担差额，未使用部分释放","示例保底1000、有效奖池800：占用1000＝承担200＋释放800；服务费不计入奖池。报名与重进都截止后定稿"],["取消保底赛","开赛前取消：保证金全额释放；玩家报名金额与服务费全额退还，门票报名退回门票","创建者保底释放与玩家退款是不同账户／不同子单，不混成同笔收入"],["分成入账／追回","00§7.4：周结入本人可用；追回可负余额；入账加1倍流水要求","周账单→分成事件→钱包流水→通知；追回关联原单与理由，负余额限制与补回记录"],["现金桌带入／离桌","03／05：可用转占用，离桌结算回可用","会话累计带入／补充／带出、每手输赢；每手筹码变化不能重复算钱包入账"],["赛事报名／重进／取消","03／07：余额或门票、服务费、退款","报名单与每次重进子单、占用／扣除／退回、奖金赏金；比赛筹码不当现金"]]},{"h":"11.3 共用筛选、输入与排序规范","li":["所有下表中的「输入」均为具名输入框：ID／单号精确查，名称／昵称关键词查，不能做当前页数据生成的下拉。","筛选枚举显示完整合法选项；数值区间支持最小／最大。","总后台统一加站点、币种；俱乐部业务加俱乐部ID／名称、创建者ID、总代／一级代理范围。","本人钱包固定本人，不默认套俱乐部过滤（个人充值可能无club_id）。","记录默认近30天；审核工作页默认待审且最早申请优先；业务历史默认时间倒序＋唯一ID稳定排序；赛事待开赛按开赛时间正序；设置按配置排序号。","日期标签明确发生／申请／审核／结算时间，按站点时区，结束日包含全天。","精确单号查询若受日期限制需显示提示。","每页查询、重置、高级筛选、50/100/200分页、全部结果合计、导出同范围；查询变化回第一页，详情返回恢复条件。","金额分币种汇总；现金、赛事筹码、钻石不相加。","菜单角标注明范围，不能把全平台数量与当前俱乐部数量混用。","每行是一项二级页或独立页签；同一业务只有一套数据。","处理页放业务分组，历史明细放数据中心，快捷入口只传查询条件，不能复制账单。","下列「代理」：本=本人私有数据；俱=本人创建／明确授权俱乐部；总=总代直属范围；无=不开放。","写操作还须符合06创建者／管理员权限，不能只看代理级别。"]},{"h":"11.4 总后台完整目录（按顺序）","li":["表内前台编号对应PRD，非网页已实现状态。"]},{"h":"11.4 工作台","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["仪表盘","俱乐部ID、代理ID","统计日期、币种、对比周期","经营指标、钱包异常、待办跳转","俱／本","08、12"],["待办中心","业务单号、对象ID、处理人","类型、优先级、状态、提交时间","入会、财务、配置、异常待办各自原单处理","本／俱","10"]]},{"h":"11.4 用户管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["用户列表","用户ID、昵称、邮箱","游客／正式、VIP、注册时间、状态、俱乐部角色","详情、标签、当前游戏、冻结历史；记录仅作为快捷入口","俱必要资料，经成员列表进入","02、09、13"],["实名认证审核","认证单号、用户ID","证件类型、服务商、结果、提交／审核日期","复核、原因、通知；证件脱敏","仅本人认证状态","02§7"],["头像审核","用户ID、俱乐部ID、申请单号","对象类型、AI结果、审核状态、提交日期","用户／俱乐部头像对比审核","俱申请状态","06§3、09§4"],["账号安全记录","用户ID、IP、设备ID","登录方式、绑定动作、结果、发生时间","登录、密钥增删、第三方绑定；不显示秘密","本","02§8"],["防沉迷与限制","用户ID、限制单号","限制类型、生效状态、申请／生效／到期时间","充值额度、冷静期、自我排除、冻结；不能任意提前解除","本","13"]]},{"h":"11.4 俱乐部管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["俱乐部列表","俱乐部ID、名称、创建者ID","官方／私人、状态、创建日期、代理层级","资料、创建资格、归属、数量限制、关闭重开解散及阻止原因","俱；总仅授权查询","06§3/9"],["俱乐部成员","用户ID、昵称、俱乐部ID","角色、状态、加入日期、邀请来源","详情、管理员任免、移出／退出历史；创建者方可编辑角色","俱","06§5/7"],["入会审核","申请号、用户ID、昵称、俱乐部ID","待审／通过／拒绝／过期、来源、申请时间","通过拒绝、理由、7天自动拒绝、待审角标","俱创建者或管理员","06§4"],["入会审核记录","申请号、用户ID、审核人","俱乐部、结果、人工／自动、审核日期","每次申请快照与处理记录，重新申请不得覆盖旧单","俱","06§4"],["邀请记录","邀请ID、邀请人ID、用户ID","俱乐部、链接状态、注册／申请／加入结果、时间","注册→入会申请关联，不绕过审核","俱","02§3.3、06§4.2"],["俱乐部消息","消息ID、标题、接收用户ID、关联单号","俱乐部、业务类型、发送状态、已读状态、发送时间","创建、入会、管理员任免、解散、分成及负余额通知；本次只做查询，不开放发送","俱；私人通知限本人","08§8"],["俱乐部设置","俱乐部ID、名称、版本","设置项、生效状态、修改时间","介绍头像、免审核、管理员报表开关；平台另配创建资格、数量上限","俱允许字段","06§3/5/8"]]},{"h":"11.4 代理管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["代理列表","代理ID、账号、名称、绑定用户ID、上级ID","总代／一级、俱乐部、状态、建立日期","统一两层、归属、授权、停启用、关联创建者；总后台无子代理菜单","本；总可查直属","10§11.9"],["分成设定","代理ID、创建者ID、俱乐部ID、版本","一般主／总代／一级、抽水／服务费、状态、生效周期","一般主两张等级表与代理固定比例分开；比例申请审核及历史","本只读；总申请直属设置","00§7、05§6、10§11.9"],["分成结算","账单号、创建者ID、代理ID、俱乐部ID","周期、来源、待复核／暂缓／入账／追回／没收、入账日期","计算复核、入账、追回；未入账不得算可用余额","本／总授权账单；不可审批付款","00§7.4"],["分成异议","异议号、账单号、提交人","俱乐部、状态、申请／处理日期","提交证据、回复、处理结果，不直接改账","本","10"]]},{"h":"11.4 游戏管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["现金桌管理","桌号、桌名、创建者ID、用户ID","官方／私人、俱乐部、玩法、盲注、桌型、状态、发牌来源、开桌日期","开桌、观看、暂停恢复、离桌、解散；开桌后规则不可改","俱按角色；创建者才能开桌／解散","05、06"],["赛事管理","赛事ID、名称、创建者ID","俱乐部、官方／私人、赛制、状态、开赛日期、报名费范围、是否保底","创建、模板、报名人数、取消、退款结果、奖励","俱按角色；只有创建者开赛／取消","06§8、07"],["赛事模板","模板ID、名称、版本","赛制、速度、状态、修改时间","盲注、费用、重进、延迟报名、奖励分配、封面","俱只读选用","07§5"],["玩法与桌规","规则ID、版本","玩法、盲注、桌型、状态、生效日期","抽水封顶、带入上下限、兑现上限、倒数、开放状态","俱只读平台参数，开桌选允许项","05"],["Jackpot设置","池ID、规则版本","玩法、盲注、状态、生效时间","注入、触发、派奖规则；资金调整双人复核","无","05§12"],["新人局设置","规则版本","启用状态、修改时间","虚拟筹码重置、配桌、机器人；不计真实资金","无","04"],["聊天快捷语与表情","项目ID、名称、文案关键词","语言、来源、启用／审核状态、修改时间","文案、图片复核、排序","无","05§13"],["多阶段赛事","赛事ID、主赛ID","阶段、状态、晋级状态、开赛日期","官方规划模块；尚未开放不得开通成可用","无；私人开赛不包含","07§15"]]},{"h":"11.4 资金管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["钱包账户","用户ID、昵称、创建者ID","币种、可用／占用／提现冻结金额范围、负余额、账号状态","总额、可用、占用来源、可提、流水要求；只读，不直接改数","本","00§5、03§3"],["充值订单","订单号、用户ID、渠道单号、交易哈希、附言","方式、渠道、状态、金额范围、创建／到账时间","核对、凭证、回调、实际到账；财务处理","本查询，充值入口回WAP","03§4"],["提现订单","订单号、用户ID、收款账户尾号","渠道、状态、首次提现、风控结果、金额、申请／打款时间","审核、费用、冻结与失败退回；财务处理","本查询，提现与验证回WAP","03§5"],["收款账户","用户ID、账户ID、尾号","银行／链、绑定／删除状态、新绑冷却、绑定时间","脱敏实名一致性、占用订单；本人WAP管理","本","03§6"],["保底资金管理","保底单号、赛事ID、创建者ID、俱乐部ID","占用／结算／释放／失败状态、金额范围、创建／处理时间","原冻结、最终差额、释放、剩余占用、关联流水；不自由解冻","本；其他创建者仅授权业务数据","00§7.3、06§8、07§14"],["退款与补偿处理","退款单号、原订单号、用户ID、赛事ID","原因、余额／门票、状态、金额、申请／完成时间","退款执行与失败查询、原单幂等、保底释放分开","本查询；俱仅本赛事业务退款","03、07§8、15"],["人工资金调整","申请号、用户ID、申请人、审批人","增／减、原因类型、状态、金额、提交／审批时间","前后余额、原因、双人复核；不能覆盖原账","无；本人结果可查流水","10§4"],["支付渠道与费率","渠道ID、名称、配置版本","方式、链、币种、启用状态、生效时间","限额、手续费、汇差、平台收款账户与变更","无","03§7"],["支付对账","批次号、订单号、渠道单号","渠道、币种、对账日期、差异类型、处理状态","系统／通道／链上差异、证据及处置","无","03§8"],["冷热钱包与调拨","钱包ID、调拨单号、交易哈希","币种、网络、方向、状态、时间","水位、归集、调拨与复核","无","03§8"]]},{"h":"11.4 运营管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["商品管理","商品ID、名称","类型、子类、售价范围、审核／上下架状态、语言、时间","素材、限购、有效期、版本审核","无，商户独立授权","14、10§6"],["钻石兑换设置","档位ID、版本","价格／数量范围、启用状态、生效时间","汇率、档位、加送、旧单快照","无","14§3"],["道具发放与补发","申请号、用户ID、道具ID","来源、状态、申请人、审批人、时间","双人复核、发放失败、库存关联","无","10§6"],["VIP设置","等级、版本","状态、生效时间","贡献门槛、返水、提现权益、升级奖励","无","09§10"],["返水结算","结算单号、用户ID","周期、VIP、状态、金额、入账日期","贡献基数、有效比例、入账及流水要求","本结果查询","09§10.3"],["活动管理","活动ID、名称","类型、受众、状态、预算状态、起止时间","审核、预算、互斥、流水倍数、领取方式","无，商户独立授权","09§11、10§7"],["任务与领奖审核","申请号、活动ID、用户ID","任务类型、审核／发放状态、提交时间","证据、申请审核、预算与重复领取保护","无；本结果查询","09§11"]]},{"h":"11.4 内容与客服","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["Banner管理","内容ID、标题","受众、语言、状态、上下线时间","图片三语、排序、跳转","无","08§6"],["公告与个人消息","消息ID、标题、接收用户ID","分类、站点、语言、发送状态、已读状态、时间","官方公告、个人信息、投递与撤回；不混同俱乐部群发","本收件查询","08§8"],["扑克焦点与教学","文章ID、标题","分类、语言、状态、发布时间","教学／官方动态与排序","无","04、08§10"],["页面素材与条款","素材ID、标题、版本","PC／PWA／条款／隐私、语言、状态、生效时间","主视觉、教学视频、版本与发布","无","01、02"],["帮助中心","文章ID、关键词","分类、语言、状态、更新时间","内容与问题解答","无","09"],["客服工单","工单号、用户ID、关联订单／手牌","问题类型、优先级、状态、负责人、时间","钱包争议、牌局问题、注销请求、处理历史","本提交与查询","09、10"]]},{"h":"11.4 数据中心","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["牌局记录","手牌号、桌号、玩家ID、荷官ID","俱乐部、玩法、盲注、发牌来源、状态、开始／结算时间","一手一行；行动回放、主边池、抽水、终止关联；非玩家底牌默认隐藏","俱脱敏；代理只看摊牌已亮出的牌","05、09§7、16"],["玩家牌局明细","用户ID、昵称、手牌号、桌号","俱乐部、玩法、盲注、现金／赛事筹码、时间、输赢范围","一玩家一手；投入、收回、净变化，不能重复汇总整桌底池；代理不能看底牌，只看摊牌时已亮出的牌","本／俱授权业务","09记录中心 → 牌局记录"],["带入与离桌记录","会话ID、业务单号、用户ID、桌号","俱乐部、带入／补充／离桌、状态、金额、时间","会话资金来源与释放，关联钱包和手牌","本／俱业务金额，不含私人余额","03、05"],["赛事参与记录","赛事ID、名称、用户ID、报名号","俱乐部、赛制、状态、余额／门票、重进次数、名次、报名／结算时间","一玩家一赛事汇总，展开报名及重进；奖金、退款、赏金、门票","本／俱","09记录中心 → 赛事记录、07"],["赛事派奖记录","派奖单号、赛事ID、用户ID","奖励类型、状态、币种、金额、派奖时间","名次奖、赏金、余数现金、门票，失败可追踪","本／俱","07§11/12/13"],["资金流水","流水ID、原业务单号、用户ID、保底单号","资产、事件类型、可用／占用／冻结、方向、状态、金额、发生时间","逐笔前后余额与状态变化，不只按类型汇总；原单和子事件可展开","本；不开放成员全站账","03§9"],["充值记录","订单号、用户ID、渠道单号、交易哈希","方式、状态、金额、下单／到账时间","只读订单投影；跳同一充值订单处理页","本","09记录中心 → 充值记录"],["提现记录","订单号、用户ID","渠道、状态、金额、申请／完成时间","只读订单投影；失败退回与手续费","本","09记录中心 → 提现记录"],["分成明细","分成单号、账单号、创建者ID、代理ID、源手牌／赛事ID","俱乐部、来源、模式、比例版本、周期、状态","有效基数、原分成、追回、净额及钱包关联","本／总授权业务","06报表与分成、03流水"],["返水记录","单号、用户ID","VIP、周期、状态、金额、入账时间","贡献、比例、金额、到账与流水要求","本","09记录中心 → 返水记录"],["奖励记录","奖励单号、用户ID、活动ID／名称","活动／升级／签到、资产类型、状态、领取／发放日期","现金、钻石、道具分别汇总","本；俱仅有明确关联的业务","09记录中心 → 奖励记录"],["商城订单","订单号、用户ID、商品ID／名称","兑换／购买、商品类型、状态、创建时间","兑换扣余额、加钻石；购买扣钻石与道具，不重复计现金消费","本","09记录中心 → 商城订单、14"],["钻石流水","流水号、用户ID、关联订单号","来源、收入／支出、数量范围、时间","兑换、加送、签到、消费、前后钻石","本","14商城余额及订单"],["门票记录","门票ID、用户ID、来源／目标赛事ID","俱乐部、阶段、可用／使用／退回／过期、有效期、使用时间","发放、使用、退回链路，不折现","本／俱相关赛事","09我的门票、07§13"],["道具库存与使用记录","道具ID、用户ID、订单号、手牌号","类型、来源、装备／使用／过期、时间","获得、数量、装备、消耗、有效期","本","09我的道具、14"],["Jackpot与兑现记录","手牌号、用户ID、池ID、事件号","注入／派奖／兑现、盲注、状态、发生时间","彩金代管收支、兑现金额和费用；不算普通抽水分成","本／俱相关业务","05§12、03流水"],["新人局记录","游客／用户ID、桌号、会话ID","教学／试玩、虚拟筹码事件、日期","配桌、虚拟筹码重置和结果；不混现金报表","无","04结果页，非09正式牌局"],["统计报表","用户／俱乐部／代理／桌／赛事／商品ID","用户／资金／牌桌／赛事／商城／代理页签、日期、币种、状态、来源","留存转化、收入成本、保底差额、净分成；从指标下钻上述明细","俱经营汇总；本收益","12"],["导出任务","任务ID、申请人、对象ID","页面、状态、申请时间","筛选快照、范围、完成下载、失败原因；权限失效后禁止下载","本申请","10§11"]]},{"h":"11.4 风控管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["风控告警","告警ID、用户ID、俱乐部ID、手牌号","规则、严重度、状态、负责人、发生时间","冻结、暂缓、处置与原单关联","无；仅本人结果通知","13"],["异常牌局与调查","案件号、异常事件号、手牌号、桌号、荷官ID","类型、阶段、状态、发生时间、负责人","荷官报告、证据、主管裁定、恢复与结案区分","无","16"],["稽核记录","稽核任务号、执行人、手牌号","范围、结果、执行日期","样本、差异、执行历史，不宣称分布正常即公平","无","16"],["风控规则","规则ID、名称、版本","类别、启用状态、生效时间","阈值与审批，既有告警不随停用消失","无","13"],["名单与资金来源审核","用户ID、案件号、材料号","名单类型、筛查结果、材料状态、审核时间","敏感材料与审核记录","无","13§3"],["访问白名单","IP／CIDR、用途、申请人","有效／待审批／过期、到期日期","VPN例外、双人复核；与业务代理无关","无","13§2"]]},{"h":"11.4 平台管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["商户管理","商户ID、名称","状态、站点、建立日期","包网资料与独立商户授权，不混俱乐部代理","无","00、10§8"],["站点管理","站点ID、名称、商户ID","币种、语言、时区、地区、状态","站点模板、品牌、支付与KYC配置入口","无","00§5"],["功能授权","账号／代理ID、模块编号、页面名称","身份、范围、操作、开通状态、生效／到期时间","同一菜单定义；查看／导出／新增／编辑／审批分开；待开发不等于未开通","本只读；总分配不超上限","10§11"],["商户收费与结算","商户ID、账单号、配置版本","月份、币种、状态、生效时间","开站费、月保底、NGR比例、模块费、结转及异议","无，独立商户入口","10§8"]]},{"h":"11.4 系统管理","t":[["页面","输入查询","下拉／区间筛选","内容与操作","代理范围","前台／PRD对应"],["后台账号与角色权限","账号ID、姓名、角色ID、模块名","后台类型、状态、最后登录时间","账号启停、权限、两步验证；员工账号不是下级代理","本安全，不获平台账号管理","10§3/4"],["账号安全","账号、会话ID、IP","设备、动作、结果、时间","本人密码、两步验证、会话与登录记录","本","10§3"],["业务参数与维护","参数名称、版本","模块、状态、生效时间","验证码、收款账户上限、防沉迷选项、维护；业务配置只保留唯一入口","无","01、02、03、13"],["第三方服务","服务商、配置ID","邮件／KYC／登录／IP信誉、主备、状态、统计日期","服务状态、遮罩密钥、切换日志","无","10§5.1"],["邮件发送记录","用户ID、邮箱、发送单号","用途、服务商、状态、发送时间","送达与失败、验证失败次数，无验证码","本安全通知不开放全站邮件日志","10§5.2"],["操作日志","操作者ID、对象ID、关联单号","模块、动作、结果、发生时间","旧值、新值、理由、审批关联","本／俱授权","10"],["审批记录","审批号、对象ID、申请人、审批人","类型、状态、提交／处理时间","独立双人审批及拒绝理由","本申请","10"],["异常任务","任务号、请求号、原业务单号","回调／结算／退款／发奖、状态、错误、重试次数、时间","原单查询、幂等重试、处理结果，不制造新扣款","无；本原单可查进度","11、15"]]},{"h":"11.5 代理后台实际应显示的顺序","li":["以下复用第11.4节同名页面的筛选和输入，不另起一套字段；本站固定，俱乐部选择仅显示授权集合。标“本人”的user_id锁定登录绑定用户。应提供的目标功能不是当前已开通清单。","为减少菜单拥挤，数据中心可按“游戏记录／资金与收益／资产记录／报表与导出”做二级页，表中各记录成为同名页签；功能授权仍逐页签列出，不能用一个笼统“记录查询”开关。"],"t":[["一级菜单","二级页面／页签顺序","谁能看、能做什么"],["工作台","仪表盘、待办中心","本人余额／保底占用／预计与已入账分成、我的俱乐部统计；待审、失败结算跳原单"],["俱乐部管理","俱乐部列表、俱乐部成员、入会审核、入会审核记录、邀请记录、俱乐部消息、俱乐部设置","总代及一级代理均可管理自建俱乐部；任免／移除仅创建者，入会审核可管理员；不是“上级可任意管理下级”"],["游戏管理","现金桌管理、赛事管理、赛事模板（只读）","当前本人俱乐部；创建者开桌／开赛／取消，管理员只按06管理秩序；真人异常暂停不由普通管理员恢复"],["钱包与资金","钱包账户（本人）、充值订单（本人）、提现订单（本人）、收款账户（本人）、保底资金管理、退款与补偿处理（只读）","本人钱包完整；去充值／提现回WAP原安全流程；不审批其他人的充提，不给成员上下分"],["代理管理","代理列表（本人资料）、子代理列表（仅总代）、分成设定、分成结算、分成异议","子代理列表复用总后台代理列表并固定上级；一级不显示下级入口；一般创建者无代理关系但仍有自己俱乐部分成"],["数据中心","牌局记录、玩家牌局明细、带入与离桌记录、赛事参与记录、赛事派奖记录、资金流水、充值记录、提现记录、分成明细、返水记录、奖励记录、商城订单、钻石流水、门票记录、道具库存与使用记录、Jackpot与兑现记录、统计报表、导出任务","游戏查询限本人／本俱乐部；资金、返水、商城、道具限本人；门票可查本俱乐部赛事关联，不查别的俱乐部资产；切换本人／俱乐部范围明示"],["支持与设置","客服工单、功能授权（只读）、账号安全、操作日志、审批记录（本人申请）","本人及允许的俱乐部范围；平台参数／风控调查／财务审批不下放"]]},{"h":"11.6 前台记录逐项对账","li":["前台七类记录名称保留，后台增加业务粒度说明；后台记录不得只读取当前Demo登录玩家。前台并非只有七类：03资金流水、06经营报表、门票道具和消息也必须覆盖。","业务单号可沿用前台展示编号，但不能作为全部账务事件的唯一主键：同一赛事单会有报名、奖金、退款等事件，同一保底单会有占用、扣除、释放；各事件另有唯一ID。","失败提现前台保持一笔“失败（已退回）”，后台展开冻结及释放事件，不能在前台重复算成一笔收入。"],"t":[["前台入口","总后台／代理对应","对账主键与必须一致字段"],["我的→记录中心→牌局记录","数据中心→玩家牌局明细；点手牌开牌局记录","site_id＋hand_id＋user_id；时间、桌、投入、返还、净变化、单位；整手只存一份"],["赛事记录／我的赛事","赛事参与记录＋赛事派奖记录","tournament_id＋user_id；展开registration_id／reentry_id；报名费、服务费、退款、奖金、赏金、排名、状态"],["返水记录","返水记录","rebate_id、周期、贡献基数、比例、入账金额和时间"],["充值记录","充值记录／充值订单（同一单）","deposit_id、渠道单、申请额、手续费、到账额、状态、时间"],["提现记录","提现记录／提现订单（同一单）","withdrawal_id、申请额、手续费、冻结、实际出账、退回结果、状态"],["奖励记录","奖励记录","reward_id、活动／升级／签到、现金／钻石／道具、数量、领取与发放状态"],["商城订单","商城订单＋钻石流水＋道具记录","order_id、兑换／购买、余额扣款、钻石增减、物品、购买时规则；不重复计费"],["充提→资金流水","数据中心→资金流水（本人）","ledger_event_id＋business_order_id；事件、金额、可用／占用／冻结前后值。当前03有该页而09七页签无此项，须补明确入口，不删规则"],["俱乐部管理→保底资金明细（补入口）","保底资金管理＋本人资金流水","guarantee_id＋tournament_id＋owner_user_id＋club_id；冻结、差额、释放、剩余占用及状态"],["俱乐部管理→报表与分成","统计报表＋分成明细＋分成结算","club_id＋周期＋share_bill_id＋受益用户＋费率版本；预估、待复核、已入账、追回分开"],["我的门票","门票记录","ticket_id、来源赛事、目标赛事、使用报名号、退回、到期和状态"],["我的道具","道具库存与使用记录","item_instance_id／库存批次、获得单号、使用事件、手牌号、有效期和数量"],["消息中心→俱乐部消息","俱乐部消息","message_id＋recipient_user_id＋关联业务单；投递、已读、用户删除与平台留档分开"],["俱乐部入会状态","入会审核／入会审核记录","application_id、club_id、user_id、状态、拒绝理由、处理人时间"],["新人局结果","新人局记录（平台）","游客／用户ID＋虚拟会话；不进入真实资金或现金输赢"]]},{"h":"11.7 冲突修正与 PM 定案（2021-03-29）","t":[["项目","核对结果与本次处理"],["本人钱包权限","修正此前“代理钱包不开放”概括：本人必须可查完整记录，成员／下级全站钱包仍不开放"],["取消赛事是否有收入","已定案：私人赛事被取消时退还服务费；玩家自行退赛与平台取消官方赛事同样全额退费。已退还的服务费不计收入；取代旧“私人赛事取消保留服务费”"],["谁能关闭重开俱乐部","10§13写只由总后台，与06§9冲突；保留创建者合法关闭／重开／解散权限及安全验证，平台另有行政处置权"],["俱乐部主动发消息","已定案：代理的俱乐部消息本次只做查询，不开放发送"],["管理员移除与角色编辑","06只给创建者，不能因“获授权代理”笼统开放；06允许最多5人但未要求至少1名管理员，不新增“最后管理员不可移除”限制"],["普通开桌／普通开赛余额门槛","已定案：私人现金桌不收开桌费、不占用资金，创建者可用余额须大于0；私人赛事可用余额须大于0，无保底不冻结，有保底须足额并先冻结全部保底金额。取代旧“占用开桌费”描述"],["负余额补回到0","已定案：余额补回到0即解除负余额限制，但仍不能新开桌、开赛（须大于0）"],["保底差额结算时点","已定案：报名与重进都截止后定稿，以最终有效奖池算差额，只扣不足部分，其余释放；服务费不计入奖池"],["两级分成公式","已定案：0≤C≤P；P 30%、C 10% 为Demo示范值；邀请代理归属保存历史快照；同一笔收入只计一次，玩家加入多个俱乐部也不重复分成；一般创建者分成与代理分成不能重复发放"],["隐私与底牌","已定案：前台本人可见本人底牌；代理一律不能看底牌，只能看摊牌时已亮出的牌；后台运营同样不因此可见全桌底牌"],["未开放项目","已定案：PLO4／PLO5／短牌、多阶段赛事只标“即将开放”，不能开通；看公共牌卡按各专项PRD"],["同IP/GPS","05§3仍写私人可关，§9较新定案一律开启；开桌设置按较新定案，不开放关闭控件"],["废弃带入审批","05／15旧30012描述仍有残留，入座系统验证无人工审批，不在代理菜单新增带入审核"],["钱包、表单限额冲突","已定案：只有Demo暂定的金额与限额标“示范值”；已确定的金额精度、权限校验、资金守恒规则不能标成示范；后台不能静默套示范上限"]]},{"h":"11.8 开通与验收状态","li":["本轮交付为需求清单与BUG登记，未改Demo菜单或实际开关。","上一轮代码核对：旧代理只有商户／合作代理身份，模块开关仅商品、活动、多阶段；没有完整两级代理和本人资金经营台。","本轮不声称读取了用户当前浏览器的开通状态。","实施顺序：①统一菜单ID、角色与归属；②本人钱包／保底／资金流水及前台入口；③俱乐部成员审核与消息；④两级代理和分成；⑤记录、查询与导出对账；⑥系统与专项配置补齐。","每个页面必须有“待开发／已实现未授权／已授权待测试／验收通过”独立状态，不能把加菜单算实现。","验收样例：同一创建者有两家俱乐部；钱包2000，建保底1000后可用1000占用1000，奖池800时承担200、释放800后可用1800占用0（不含其他变动）。","另一场开赛前取消则保证金全额释放，玩家报名金额与服务费全额退还另记。","总后台、代理本人、WAP钱包与保底详情四处金额一致；重复请求无重复冻结／释放。","再覆盖分成追回负余额、充提失败退回、重进、门票退回、跨俱乐部成员、跨代理越权、站点时区边界、精确单号与筛选分页导出一致。"]},{"h":"11.9 授权与两级分成补充","li":["授权目录统一feature_id、菜单名和操作名；总代端「子代理列表」是同一代理列表固定parent_agent_id的范围视图。","查看、导出、新增、修改、审批单独授权。","有效权限＝平台可开放∩对象已开通∩角色允许∩数据范围。","关闭模块不删除历史账单，清算与只读权限明确保留；未实现必须标待开发。","两级分成同基数公式已定案：收入B、总代池比例P、下级比例C，0≤C≤P，一级=B×C，总代留存=B×P−一级；P 30%、C 10% 为Demo示范值。邀请代理归属保存历史快照；同一笔收入只计一次，玩家加入多个俱乐部也不重复分成。","设定字段为俱乐部、代理、收入来源、上限、申请比例、生效周期、版本、理由、申请人和审核人。","审批后下一完整周期生效；上限降低须检查全部下级；旧账单锁定归属与比例快照，不追改历史。","普通俱乐部主仍按00／05的独立等级表；一般创建者分成与代理分成不能重复发放。","用户详情固定用户ID与站点，包含资料、账号安全、实名与限制、钱包与流水、前台七类记录、当前游戏、俱乐部与代理、VIP奖励、门票道具、消息工单、操作历史。","每页复用11.4具名筛选，固定用户不可被参数覆盖；钱包本人查询与成员业务查询严格分离。"]}];}const n={"id":"16","title":"派牌管理后台","purpose":"定义真人荷官台：一荷官一桌、手动录牌、确认玩家行动与系统结算、异常暂停上报与主管裁定；记录查询与稽核归总后台。","sec":[{"h":"1. 文档信息与职责","t":[["项目","内容"],["版本","v0.1，2021-03-29 独立建档"],["状态","PRD；本地 Demo 与正式接入边界分别标明"],["使用者","真人荷官；主管负责独立裁定，平台风控负责调查"],["上游","00 总览、01 全局、03 钱包、05 现金桌、10 后台、11 接口、13 风控、15 异常"],["对应原型","demo/dealer.html"],["原章节","10 后台原第 12 节；迁移不变更既有游戏规则"]],"li":["一荷官一桌：玩家在手机行动，荷官手动录牌、确认玩家行动与系统结算。","总后台负责跨桌记录查询与风控调查；代理后台只查获授权俱乐部的记录，不获得荷官或主管权限。","取代旧版“派牌稽核后台”定位。原电子现金桌行为不变，不把所有站点或原 WAP 自动改为真人模式。"]},{"h":"2. 职责迁移与菜单","t":[["原功能","新入口","迁移要求"],["派牌后台牌局记录与查询","总后台 → 数据中心 → 牌局记录","保留原电子牌局、逐街回放、结算及历史；增加真人来源、荷官和终止状态；前台七类记录不改名"],["稽核","总后台 → 风控 → 稽核","保留执行与历史结果；点数分布只作异常线索，不表述为公平认证"],["异常牌局与调查","总后台 → 风控 → 异常牌局与调查","既有案件保留；真人报告关联手牌、现场快照、主管裁定与结果"],["派牌管理后台","荷官操作台","只保留开桌、当前手牌、录牌、确认牌面、确认结算、暂停上报及本桌操作流水"]]},{"h":"3. 本轮 Demo 范围","t":[["项目","规则"],["玩法与人数","NLH，固定 6 人桌（座位 1～6；入座由演示工具模拟，荷官台不提供入座按钮）"],["盲注与筹码","0.50 / 1.00；每人初始 100.00 模拟筹码"],["抽水","5%，封顶 3.00；未见翻牌不抽水"],["桌台绑定","一名荷官同一时刻只绑定一桌；本机沙箱只运行一张桌，LIVE-01 / LIVE-02 二选一；他人已占用的桌不能操作"],["示范账号","dealer_01 / dealer_02，密码 123456，验证码 000000"],["存档","独立本地存储 dz_live_dealer_v1；不改 WAP 钱包、牌桌、手机计时或实际资金"],["时间口径","全站 App 时钟：Demo 日期 2021-03-29 + 真实时分，格式 YYYY-MM-DD HH:mm"],["后台语言","三套后台只提供简中与英文，偏好存 dz_admin_lang，与前台语言分开"]],"li":["## 荷官与玩家分工","本轮新定案（2026-10-21）：底牌由设备识别并绑定座位（Demo 为模拟识别），荷官不录入、不看牌面，只确认“底牌已发出”；读取缺失、重复或座位不符不得下注，只能重扫或暂停呼叫督导。公共牌由荷官录入或扫描。","荷官台不提供玩家手机模拟或任何代玩家操作；Demo 由系统替模拟玩家自动行动，结果只读显示在座位旁。","玩家在手机发起行动，经服务端校验并成功提交后立即生效；荷官不确认，不能改金额、代下注或补填行动。","系统自动计算比牌、主池边池、未跟注退回、平分尾差与抽水；荷官核对后确认一次，不能手输赢家或改派奖。","结算确认后写入总后台“数据中心 → 牌局记录”（来源：真人荷官），单手详情含座位、底牌、逐步行动与每步底池、主池边池、抽水与核对。","## 英文模式要求","英文模式整页不残留中文：菜单、表头、筛选、按钮、Toast、确认弹窗、空状态、单手详情、CSV 表头、示范账号卡片。","拼接句用整句模板；用户输入的资料不翻译；内容管理三语内容显示英文版本。","## 本轮不做","真实视频上传、真实手机 WS、现场设备识别、多人跨服务器锁、真人赛事、Jackpot、全押兑现、多次发牌、实际出入金。","主管模拟身份只是演示开关；正式版须独立账号、权限与会话。","实体底牌的受控读取方式（摄像或指定录入工位）须在正式接现场前确认。"]},{"h":"3.1 荷官台画面","li":["暗黑金牌桌视角：椭圆牌桌，荷官位在下方中央，固定 6 个座位（座位 1～6），位置与编号不变；空位显示空座框与编号，入座或离座时不重排。","桌心 5 个公共牌格（翻牌 3、转牌 1、河牌 1）；未发为虚线空框，本街待录入格高亮；上方显示街次与手牌编号，下方显示底池与抽水。","座位只放头像、昵称、筹码、本轮下注、庄 / SB / BB 标记、行动中高亮与两张牌背；行动倒数为头像外圈金色圆环，与 20 秒截止时间同源。","座位整块放在金色桌边外侧，放不下才放内侧，不跨桌边线；下注筹码放在桌边内侧；座位之间、与公共牌区都不重叠。","9 个座位头像取自 32 张头像池，互不重复；摊牌时依摊牌规则只翻开未弃牌座位的底牌并标牌型（弃牌者不公开），英文牌型用 Title Case 且不折行。","右侧只有荷官操作面板（开桌、确认底牌已发出、公共牌录牌、确认牌面、结算、暂停报告），不含玩家手机模拟；操作流水折叠在下方；演示工具为独立侧栏。","顶栏说明为“演示版：模拟识别与模拟玩家，不与前台连动”，1280 宽不截断；标题不用点号拼接。","主管裁定面板吸底按钮预留高度，“裁定原因”输入框可完整卷出。"]},{"h":"4. 完整状态流程","p":"开桌检查 → 待开手 → 确认洗牌装靴 → 下盲注 → 发底牌（按钮左手第一位起顺时针，每人先第 1 张）→ 确认牌面 → 翻前行动（服务端校验提交后立即生效）→ 进入下一圈、烧牌并录翻牌 → 翻牌行动 → 录转牌 → 转牌行动 → 录河牌 → 河牌行动 → 系统计算 → 荷官确认结算 → 归档 → 下一手或关桌","t":[["阶段","荷官操作","系统校验与玩家展示"],["开桌","选桌，输入荷官名字（必填），确认牌具、座位、设备；在座人数来自玩家入座（Demo 由演示工具模拟）","一人一桌；显示规则与模拟带入；已有负责荷官的桌不能抢占"],["开手","勾选已洗牌装靴，点击开始新局（Start Hand）","至少两名有筹码玩家；系统轮转庄位、下盲注、生成唯一手牌编号"],["发底牌","本轮新定案：底牌由设备识别并绑定座位（Demo 为模拟识别），荷官不录入、不看牌面，只确认底牌已发出；按钮左手第一位起顺时针发牌","每录一张，对应座位显示一张牌背；共 2 × 参与人数；重复牌禁选，未满不能确认；确认前可撤销最后一张"],["确认发牌","核对本批实际牌面后确认","已确认牌荷官不可改写；此时才开启玩家行动倒数"],["玩家行动","荷官不确认，只在桌面只读查看","服务端校验并成功提交后立即生效，非法、重复、过期不推进；座位旁显示动作与下注额；超时系统自动过牌或弃牌"],["后续开牌","本街下注完成后点进入下一圈（Next Street），确认烧 1 张，再录 3 / 1 / 1 张公共牌","本街行动结束才开放；不录烧牌面；不可超量或重复；全押无人可行动时逐街续录"],["摊牌与计算","核对自动生成的结果","系统比牌分池；全部弃牌只剩一人时不补开公共牌，直接计算"],["结算确认","核对后点确认结算（Declare Winner）；有疑问点呼叫督导（暂停）","金额守恒通过才可确认；重复请求不重复派发；总后台产生记录"],["关桌","本手已结算、已终止或尚未开手时关桌","未完成手牌不能关桌；余额只是本桌模拟筹码"]],"li":["## 手牌编号","真人桌：T + 8 位 Demo 日期 + 4 码当日流水，例如 T202103290001；当日递增不重复。","当日用到 9999 即拒绝开新手，不加长、不回绕，次日从 0001 重新开始。","电子桌维持 H 开头；旧 LH 编号载入时按开局先后迁移，异常事件编号（INC-手牌编号-序号）与日志一并更新。"]},{"h":"5. 行动倒数与暂停同步","li":["行动倒数预设 20 秒，是本 Demo 独立参数，不改电子 WAP 原倒数。","荷官台与手机两侧按同一截止时间计算，不各自减秒。","玩家行动经服务端校验并成功提交后立即生效；系统推进下一位玩家并启动其倒数。荷官无需确认玩家行动，只确认牌面与系统结算结果。非法、重复、过期（state_version 不符）的行动一律拒绝，不推进牌局。","超时由系统自动处理：可过牌则过牌，否则弃牌。","## 暂停","暂停按钮固定在工作台右上角；点击立即冻结倒数，并禁用发牌、下注、结算、开下一手。","先冻结再填报告，报告未写完也不继续计时。","保存原阶段、玩家、余秒、底池、牌面、已生效行动和日志；暂停期间禁止行动、不推进倒数；恢复时从冻结余秒继续，已生效行动不重给下注机会。","刷新读取相同存档与截止时间，页面切到背景不会让计时漂移。","## 玩家提示（正式接 WAP 时于玩家端显示；荷官台已无手机模拟区）","显示事件编号；不显示他人底牌、证据、作弊推测、主管内部备注或预计恢复时间。","终止时提示“本手已终止，相关投入正按处理结果退回”；成功退回后才显示“已退回”。"],"note":"暂停文案：此牌局异常暂停中，请稍等。工作人员正在核查，您的筹码与已提交行动已保留，暂停期间不计算行动时间。"},{"h":"6. 错牌、掉牌与争议处理","t":[["类型","荷官第一步","上报必查","主管处理原则"],["未确认录入误点","撤销当前批次最后一张并重录","尚未确认且未向玩家发布","不算实体错发；不覆盖已确认记录"],["已确认牌面与实体不符","立即暂停，不自行改牌","位置、原录入、真实牌、录像时间、暴露对象、是否有后续行动","纯录入错误且无后续行动可留痕更正；已有后续行动禁止直接改写，由主管核查"],["发错对象、提前开牌、掉牌或暴露","暂停，保留牌与现场，不擅自洗牌或收回重发","牌能否识别、正反面、谁看到、是否混入弃牌、发生街次、此前行动","依场况与采用规则裁定；不是所有掉牌都自动作废重发"],["玩家争议","暂停，保留手机行动序与原始事件","玩家 ID、争议动作、时间、金额、事件 ID、录像","核对电子事件与现场证据，不凭荷官口述改下注"],["设备或网络","暂停并上报","最近确认序号、离线时段、设备、重试结果","正式版由服务端恢复完整快照，核对前不能继续发牌"]],"li":["## 报告","字段：事件编号、手牌编号、桌号、荷官、阶段、发生与上报时间、异常类型、涉及座位（下拉只列本手在座座位，另含公共区域）、是否暴露、事实说明、证据引用。","系统自动附现场快照、余秒与已生效行动；事实说明必填，证据可注明未提供，但不能因此自动结案。","## 处理状态","立即暂停 / 待补报告 → 待主管处理 → 恢复待确认或终止待确认 → 荷官执行 → 已恢复或已终止。","需深入调查的由风控关联案件继续处理；桌面恢复不等于风控结案。","## Demo 主管可选处理","核查无误，恢复原状态。","更正纯录入错误后恢复；已有后续已生效行动时禁止直接更正。","终止本手，按开手筹码快照退回模拟投入；只是演示路径，不代表真实争议都全额退款。","主管原因必填，记录旧值、新值与独立操作者；荷官再次确认执行，重复点击不重复退款。"]},{"h":"7. 页面筛选与审计","t":[["页面","筛选与定位","说明"],["荷官当前桌","本人固定桌号、当前手牌 ID、当前阶段","不提供跨站查询；卡牌面板按实际可选牌过滤"],["总后台数据中心 → 牌局记录","手牌编号、桌名、玩家关键词、牌桌、日期、来源、荷官账号、牌局状态；筛选、排序、分页、CSV","电子与真人记录并存；正式跨站接入须站点隔离"],["风控稽核","日期、结果、执行人等","保存抽样与计算记录；终止牌局不混入已结算对账"],["风控异常牌局与调查","原案件筛选；真人报告按事件 ID 展开","真人报告目前为只读列表；专属筛选列待优化，未完成"],["本桌操作流水","本沙箱只读、时间倒序，显示最近 100 条","荷官不能编辑删除；正式版须服务端不可篡改审计与保留策略"]]},{"h":"8. 参考与适用边界","t":[["参考","借鉴点","本产品边界"],["PokerStars Live Cash Game Rules","异常及时通知工作人员，由现场主管裁定","只参考升级处理职责，不照搬现场行为限制"],["PokerStars Live Tournament Poker Rules","遵循 TDA，对现场手机使用有额外限制","“手机下注 + 真人录牌”是本产品自定义混合流程"],["Poker TDA Rules","程序须结合具体场况判断","异常类别不直接等于自动退款或重发"]],"note":"以上为公开规则研究，未取得竞品内部荷官台设计；暂停弹层、同源计时、报告快照与双角色确认是本产品方案。"},{"h":"9. 角色权限与页面目录","t":[["页面或区块","查询定位","荷官操作","主管与平台边界"],["登录与桌台绑定","荷官账号、分配桌号、班次状态（正式接入待开发）","登录、认领或释放本人桌；有未结手牌不可释放","正式由服务端维护绑定，不能跨桌抢占"],["开桌与开手","本桌 ID、座位、参与人数、规则版本（固定显示 v1.0，由总后台配置）","核对座位、牌具、设备，开始本手","创建者开设牌桌不等于荷官认领；资金资格由业务服务检查"],["录牌与确认","当前手牌、街次、公共牌花色点数","确认底牌已发出（设备识别）、公共牌手动录入或扫描、撤销未确认草稿、确认牌面","已确认牌更正须经异常裁定，不覆盖原值"],["行动显示","行动 ID、玩家、动作、金额、时间","只读查看已生效的手机行动与倒数，荷官不确认","不替玩家下注，不改金额，不显示玩家视角"],["结算确认","本手 ID、主池边池、抽水、退回、玩家结果","确认系统结果一次","正式资金由服务端结算；Demo 模拟筹码不是钱包"],["异常报告","本桌本手、事件 ID、类型、座位、阶段、时间","立即暂停、补事实与证据、提交报告","主管单独裁定，风控可继续调查；恢复不等于结案"],["本桌操作流水","本桌固定；时间、事件类型、手牌或事件 ID","只读","Demo 显示最近 100 条；正式查询筛选与服务端审计待开发"]],"li":["主管模拟面板只供 Demo；正式主管通过独立授权处理异常，荷官界面不能切换主管身份。","平台后台管理员也不能代替玩家下注。"]},{"h":"10. 接口、资金与同步（正式接入待开发）","li":["## 命令校验","所有命令校验 site_id、dealer_session、table_id、hand_id、state_version、request_id；认领由服务端互斥。","一人一桌、一桌一名负责荷官同时成立。","玩家行动、荷官牌面与结算确认、主管裁定分别鉴权；重复请求返回原结果，过期版本不改变状态。","## 计时与断线","计时事件带 server_time、deadline、remaining_ms、phase；暂停保留已生效行动与余秒，暂停期间拒绝行动，恢复须取最新完整快照。","断线不能靠本机缓存继续发牌；重连先查原请求结果。","底牌按角色裁剪，普通代理、观战与其他玩家收不到隐藏底牌。","## 资金","带入、占用、离桌与异常退款沿用 03 / 05；结算事件关联资金流水，不重复入账。","牌局记录、玩家牌局明细与前台回放共用 hand_id。","Demo 存档独立，无真实资金联动；模拟关桌不能作为钱包已退款的证明。"]},{"h":"11. 验收与待办","li":["## 必测场景","开桌绑定冲突、固定 6 座底牌设备识别（缺失／重复／座位不符不得下注）、公共牌手动录牌与扫描、重复牌与缺牌、街次限制。","玩家行动校验后立即生效（非法、重复、过期 state_version 均不推进）、超时与提交竞态、全弃牌、全押边池、平分尾差、未跟注退回。","抽水与金额守恒、结算重复提交、错牌掉牌争议暂停、行动倒数中暂停。","主管裁定、更正权限、终止退款幂等、断线重连、多页并发、总后台归档与隐私权限。","## 待办","旧 12 组逻辑测试只代表当时版本，不代表固定 6 座改版与正式场景已全部通过。","现场底牌受控录入、视频证据、正式主管账号、跨服务锁、真实 WAP 同步与钱包接入仍需开发测试；现场错牌裁定细则待定案。","待办统一登记在 QA 测试备注，既有 LIVE-DLR 编号保留，不因文档迁出而关闭。"]}]};const i=a.findIndex(x=>x.id==="16");if(i<0)a.push(n);else a[i]=n;})();
+
+;(()=>{const d=window.PRD_DOCS.find(x=>x.id==='16');if(d)d.sec.push({h:'荷官位直播示意',li:['【定案】统一 Demo 时钟（2026-10-21，R29-DLR-04）：荷官台全部时间（D.ts：牌局编号 T + 日期 + 4 码、操作流水、归档）与排班共用 LDShift.now()，日期随真实日数前进。新的一手按开手当天日期编号，每日从 0001 起、序号不可重复；跨过午夜仍在进行的手牌保留开手时的编号；结算、交接等事件各自记录实际发生时间；历史记录日期一律不改。【定案】接班与补排（R29-DLR-06）：接班前必须已有本桌有效班次；无人可接时，由总后台补排（允许临时补排）。下班当下无合格接班人时，牌桌维持“等待荷官接班”，画面提示“本桌尚无可接班的有效班次，请由总后台排定接班班次。”，并产生总后台待办“真人桌待排接班”（运营、高优先、2 小时；只读 dz_ld_shifts 与牌桌存档，以 LDShift.needsCover() 判断）。补排后荷官台无需重新整理即出现接班表单；待办在补排后仍保留（状态 pending_takeover），接班真正完成后才关闭，并允许开新局。刚交班的荷官尝试接回时显示原因（R29-DLR-05）。','排班时钟与跨日（2026-10-21，R29-DLR-01）：判断班次是否到点使用会往前走的 Demo 排班时钟（LDShift.now）：日期为 App.today() 加上自首次使用起经过的真实日数，时分取真实时钟，跨过 24:00 日期即进一天；“24:00”视同次日 00:00。跨日班次（如 22:00～次日 06:00）在次日 06:00 到点；顶栏以“次日”标示。值班中途取消与接班资格（R29-DLR-02）：班次在值班中途被改为已取消时比照到点处理——进行中的这一手继续打完并结算，之后不开下一手；本手进行中显示“班次已取消，完成本手后等待接班”，结算后显示“等待荷官接班”；取消时没有进行中手牌则立即进入待接班；取消不自动流局、退款，也不暂停当前手，紧急安全事件另走呼叫督导（暂停）。接班人须在本桌有当前有效班次（已排定或值班中且涵盖现在），且未负责其他桌；未指定接班人不代表任何荷官都可接班；刚交班的荷官不能接回本班，续班须由总后台延长班次或重新排班，再经牌具核对后上桌；没有符合资格的接班人时保持“等待荷官接班”，不开新局。','荷官排班（2026-10-21，R28-DLR-06）：排班资料由总后台排班页维护，荷官台只读本人班次。共用资料存 localStorage dz_ld_shifts（阵列），每笔 {id, dealer（荷官账号）, table, start, end, tz, next（接班人账号，可空）, status}；时间为 Demo 时钟 YYYY-MM-DD HH:mm；status 为 scheduled／on_duty／ended／handed_over／cancelled。校验统一用 LDShift.validate：同一荷官班次不可重叠、同一牌桌值班时间不可重叠（cancelled 不计），另检查必填、结束晚于开始、接班人不能是本人。荷官台顶栏显示“本班 HH:mm～HH:mm　接班人 账号”（无排班显示“今日无排班”）。班次到点时：牌局中则本手照常打完并结算，之后不开下一手；两手之间则立即停止开新局；画面显示“班次已结束，等待接班”。接班荷官须以本人账号登录、输入名字并完成牌具核对，按“确认接班”后才能开新局。等待接班期间玩家可正常离桌结算，不自动流局或退款，洗牌提示照旧显示。自动开桌与下班后关桌等其余排班规则待 PM 定案。','在座人数与满座提示统一按座位总数计算（含筹码为 0 者）；“满 2 人才能开始新局”另按有筹码的人数判断（R28-DLR-07）。','Demo 入座与开局条件（2026-10-21，R28-DLR-02／03）：荷官台不提供入座／离座，只显示在座情况；玩家入座来自未来的真人桌前台，Demo 以演示工具“模拟玩家入座／离座”代替（跟随“显示演示按钮”开关，预设隐藏；只作用于真人荷官桌，不连 WAP 现金桌；只能在两手之间操作）。第一位玩家入座起，桌面显示“目前洗牌中，稍后开桌”（英文 Shuffling, the table will open shortly），开局后隐藏。荷官须先完成开桌准备（荷官名字、牌具核对）；在座不足 2 人时“开始新局”不可按，并显示“在座玩家不足 2 人，无法开始新局。”。按排班自动开桌、排班设定与下班处理待 PM 定案，本轮不做。','Demo 荷官名字与占位（2026-10-21，R28-DLR-01）：开桌前必须输入荷官名字（最多 20 字），未填不能确认开桌；名字显示在顶栏、直播示意、操作流水（名字加账号）与总后台牌局记录的“荷官”栏。更换荷官时接班荷官也须输入名字，交接记录保存交出／接班名字。每次开始新局即产生手牌编号（T + 8 位日期 + 4 码当日连号，当日最多 9999 手），立即显示在桌面、流水与记录。开桌前桌面与顶栏显示“尚未开桌”，开桌后未开手显示“待开始新局”，不再显示“—”。','牌桌下方中央显示荷官图片预览、荷官账号及直播示意（VIDEO DEMO）标识。当前为本地静态素材，不接真实视频；窄屏缩小，不承担发牌操作。']});})();
+
+;(()=>{const d=window.PRD_DOCS.find(x=>x.id==="16");if(d)d.sec.push({"h": "公共牌、设备录牌与督导介入（待开发规格）", "li": ["## 12. 公共牌、设备录牌与督导介入（2026-10-21 新增规格）", "本节补充正式产品要求，不代表扫描器、脚踏确认、换班、回滚及视频切换已在Demo实现。当前Demo的底牌为模拟识别（荷官只确认已发出），公共牌可手动录入或扫描录入（模拟读数），转手动须选原因。第3节独立模拟、不接WAP钱包的边界不变。", "### 12.1 公共牌与行动顺序", "| 阶段 | 荷官步骤 | 系统放行条件与行动顺序 |", "|---|---|---|", "| 翻牌 Flop | 确认烧1张，再录入并核对3张公共牌 | 翻前下注完成；从庄家左侧顺时针首位仍在局中且可行动的玩家开始 |", "| 转牌 Turn | 再确认烧1张，录入并核对第4张公共牌 | 翻牌下注完成；重新从庄家左侧首位可行动玩家开始 |", "| 河牌 River | 再确认烧1张，录入并核对第5张公共牌 | 转牌下注完成；同上顺序，完成最后一轮下注 |", "通常小盲先行动，但已弃牌、全押或不参与本手的座位须跳过；两人局翻牌后大盲先行动。全押且无人需要继续行动时不启动虚假的行动倒数，按规则继续发剩余公共牌；只剩一名未弃牌者则直接结算，不强行补牌。烧牌只记录完成事件和序号，不向玩家公开牌面；发出的每张公共牌保留街次、位置、录入来源、确认人和时间。", "### 12.2 荷官按钮与前置条件", "| 按钮 | 何时可用 | 行为／失败处理 |", "|---|---|---|", "| 开始新局 Start Hand | 上手已结算／终止、本桌归属有效、人数和筹码满足规则 | 确认洗牌及设备就绪；采用发牌靴的现场另确认装靴。系统生成手牌号并执行盲注，不由荷官修改下注 |", "| 确认牌面 Card Scanned / Confirm | 扫描或手输形成待确认草稿 | 显示当前目标、数字牌面与来源，检查数量、重复牌、街次；确认后才写入有效发牌事件。脚踏设备与点击共用命令，去抖及幂等，不能连续确认多张 |", "| 手动输入 Manual Entry | 扫描失败或已选择手动模式，且当前阶段允许录牌 | 虚拟花色／点数键盘；扫描模式转手输须填写原因、关联失败读数。不可通过手输修改已确认牌；底牌显示按权限遮罩 |", "| 重新扫描 Scan Retry | 当前有未确认错误读数且扫描设备在线 | 清除未确认草稿并重新请求该位置读数；保留原读数与失败日志。旧请求迟到结果丢弃，不清除已确认的牌，不删除历史事件 |", "| 进入下一圈 Next Street | 系统确认本街投注完成、无异常暂停 | 提示烧牌并开放本街牌位；不得靠按钮跳过玩家行动或绕过烧牌确认。重复点击不能多发牌 |", "| 确认结算 Declare Winner | 系统已完成比牌、分池与金额校验 | 显示赢家和计算明细，荷官仅确认，不能手选赢家或金额。服务端提交成功后才播放结算动画和更新筹码；超时先查询原结果 |", "| 更换荷官 Dealer Change | 通常限两手间，无未处理异常和未完成的牌面录入 | 原荷官发起、新荷官独立登录接收、服务端原子转移绑定；记录开始结束时间和交接人。手中紧急换班须先暂停并由主管批准，不改变牌局快照 |", "| 呼叫督导 Call Floor / Supervisor | 当前桌异常或争议 | 一键暂停游戏与倒数、生成事件、保留现场，再补报告；主管认领事件并获得裁定权限，荷官保留查看与补充证据权限，不是转交平台管理员全权 |", "换班服务时长、手数、异常次数作为记录；绩效评分口径另定，不以异常少自动评价更好。扫描／脚踏设备未接入时明确显示“设备未接入”，不可用模拟成功伪装真实读取。扫描到烧牌或错误座位的读数不得自动当作公共牌确认。", "### 12.3 总后台督导工作台", "入口：总后台 → 风控管理 → 真人桌督导。与异常牌局与调查共用事件，不另建重复案件。React／Vue不是产品约束；实时状态须由服务端事件同步，断线后获取完整快照。", "| 页签 | 输入查询 | 筛选 | 内容及动作 |", "|---|---|---|---|", "| 实时桌台 | 桌号、手牌号、荷官账号、俱乐部ID | 站点、桌状态、街次、设备／串流状态、暂停时长 | 进行中状态、倒数、最近已生效行动、视频预览；暂停、认领、查看报告 |", "| 异常处置 | 事件ID、案件号、手牌号、玩家ID | 类型、严重度、待认领／处理中／待执行／已处理、负责人、发生时间 | 现场快照、行动序、原读数、暴露范围、证据、处置预览及结果 |", "| 处置记录 | 裁定单号、原事件ID、操作者ID | 回滚／流局／比牌／恢复、状态、处理时间 | 原状态、新状态、受影响行动、逐玩家金额、审批与执行日志 |", "| 荷官交接 | 交接单号、桌号、交出／接班账号 | 状态、正常／紧急、起止时间 | 绑定变更、服务时段、手数与异常记录，不开放修改绩效原始记录 |", "| 视频与设备 | 桌号、设备ID、串流ID | 主／备、在线／离线／切换中／失败、时间 | 设备状态、切换与中断历史；凭证不在普通列表展示 |", "### 12.4 督导处置规则", "| 操作 | 前置与确认 | 状态及资金处理 |", "|---|---|---|", "| 回滚上一动 Rollback Action | 先暂停并认领；选择最后有效检查点，预览受影响动作／牌面、玩家与筹码差额，填写原因；有已暴露信息或后续有效行动时禁止无条件一键回退，转正式裁定 | 以追加的失效事件与补偿事件处理，不删除原行动。只退被裁定无效的投注；保留此前有效投注。通常退回桌上筹码，不再同时加到钱包；已结算手牌不能直接回滚 |", "| 流局与退款 Cancel Hand / Refund | 严重牌序错误等由主管裁定；断网先检查服务端快照，不因客户端断线自动流局 | 本手未结算且按全额流局裁定时恢复本手开始筹码，撤销本手相关抽水／彩金事件；此前手牌结果不变。继续在桌则回桌上筹码，离桌才释放到钱包；部分失败显示处理中／失败，成功后才显示已退回 |", "| 强制比牌 Force Showdown | 仅暂停且牌面完整有效、无未解决争议投注、所有玩家已全押或本轮合法行动已完成时允许主管触发计算 | 不是任意翻开未摊牌底牌，不剥夺尚存合法行动权，不手输赢家。公开信息限制按游戏规则，结算仍由系统计算、荷官确认；不满足条件则不可用 |", "| 冻结桌台 Freeze Table / Pause | 人工异常或服务端明确异常事件触发 | 立即停止新动作和倒数，保留状态；默认保持摄像采集与内部录像取证，不自动中断证据。确需停用玩家端视频时单独切备用字卡；画面注明暂停，不冒充实时视频 |", "| 切换备用串流 Switch Stream | 主流异常、有可用备流或备用字卡；确认目标桌号、镜头与健康状态 | 记录切前切后流ID和时间；切换失败保留异常状态。视频恢复不等于牌局恢复，需完成状态核对后独立恢复 |", "| 恢复牌局 Resume | 裁定执行成功、资金核对通过、设备就绪，无未处理阻断项 | 荷官确认恢复；使用冻结余秒与已生效行动，不重新给玩家一次下注机会 |", "涉及资金的回滚／退款必须遵守10的双人复核与独立审批要求；主管提交处置不等于自审批准，荷官核对也不自动等于财务批准。请求绑定状态版本、检查点、处置单号和幂等键。处置途中新旧事件竞态必须由服务端拒绝；通知玩家只显示暂停、处理进度及本人资金结果，不公开内部证据或他人隐藏底牌。", "### 12.5 新增验收与实现边界", "待开发验收：扫描重复／乱序／迟到读数、手动备用留痕、脚踏连触、每街烧牌与3/1/1张校验、两人局大盲先行动、弃牌及全押座位跳过、Next Street不可跳过行动、并发确认幂等、交接互斥、主管认领冲突、回滚有效／无效投注分界、已暴露牌禁止简单回退、退款不同时进入桌筹码和钱包、已结算单的独立冲正流程、比牌前置条件、录像不中断、备流失败及恢复分别确认。", "本次记录规格；当前Demo已有手动录牌、系统计算确认、暂停上报与主管模拟，硬件扫描、真实换班、独立督导后台、受控回滚、强制比牌和备流切换尚未实现。不得将增加PRD按钮清单标为功能已完成。"]});})();
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"行动键名称","li":["轮到本人时显示 弃牌 / 过牌或跟注 / 加注；第三键一律称“加注”（含本轮尚无人下注时），英文为 Raise（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"离桌时机","li":["确认离桌后立即离开牌桌画面；本手由系统接管（可过牌就过牌，否则弃牌），本手结束后自动结算；已提交离桌再次操作提示 30021（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"系统接管期间开新局","li":["离桌后本手仍由系统接管时，加入任何新牌局（含同一桌）一律拦截，弹出“上一局尚未结束”；已扣带入原路退回；本手结算完成后才能入座（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"系统接管期间进入赛事","li":["报名成功与进入牌桌是两个状态。上一手仍由系统接管时进入赛事牌桌会被拦截，但保留报名与已付费用、不退款；本手结算后从赛事页进入，期间按赛事规则由系统代打。只有报名失败才释放对应资金（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"公共牌位","li":["每手开始显示 5 格空牌位；本手结束后隐藏未发出的牌位（如翻牌前结束则不显示空格），下一手恢复（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="07");if(d){d.sec.push({"h":"赛事编号","li":["赛事对外编号为 M + 开赛日 8 位 + 当日 3 码（例：M20210329001；坐满即开以建立当日为准）。前台赛事详情、我的赛事、牌局记录与后台赛事列表、搜寻使用同一编号；内部代号不对外显示（PM 定案，2021-03-29）。"]});}}
+;{const d=window.PRD_DOCS.find(x=>x.id==="15");if(d){d.sec.push({"h":"对外编号一致性","li":["赛事编号与牌局编号由服务端产生，前后台同一栏位、同一值；后台以此编号精确或前缀搜寻（PM 定案，2021-03-29）。"]});}}
+;(()=>{/* R30-UI-60：帮助中心标题改问句（01、10 同步） */['01','10'].forEach(id=>{const d=window.PRD_DOCS.find(x=>x.id===id);if(d&&d.sec)d.sec.push({h:'帮助中心标题',li:['帮助中心标题（PM 定案，2026-10-21，R30-UI-60）：14 篇文章标题一律写成自然问句——简中、繁中如“如何充值？”，英文如“How do I deposit?”（句首大写，专有名词如 KYC、VIP 保留原样）；分类名称不改，仍用名词（如“充值与提现”）。三种语言共用同一文章 ID（HC001～HC014）与主题，只改标题，不影响搜寻关键词、链接与 AI 客服引用；繁中输入的问题同样可命中关键词。']});});})();
+;(()=>{/* R30-UI-70：登录与注册共用同一页面（01、09 同步） */['01','09'].forEach(id=>{const d=window.PRD_DOCS.find(x=>x.id===id);if(d&&d.sec)d.sec.push({h:'登录与注册共用同一页面',li:['登录与注册共用同一页面（PM 定案，2026-10-21，R30-UI-70）：登录与注册使用同一个登录页（通行密钥登录、邮箱验证码、Google／Facebook／Apple），注册版只换标题与底部切换文字（“还没有账号？注册”／“已有账号？登录”），注册另须勾选年满 18 岁与条款；“我的”卡片的登录／注册、needLogin 等所有入口都走这一页或其弹窗形态。游客绑定（needBind）仍为“绑定邮箱”，额外说明游客记录转入正式账号。未登录进入“我的”、俱乐部、充提、商城：新用户（本机未曾使用）自动弹出注册，老用户弹出登录，弹窗背景为该页；同一次打开网站四页共用只自动弹一次（sessionStorage 记录），关闭后停在当前页，显示未登录空状态与“登录／注册”入口，不显示私人资料、不回上一页，用户仍可自行点登录；需登录的业务操作照原规则拦截（needLogin／needBind）。首页不自动弹出。']});});})();
+;{const d=window.PRD_DOCS.find(x=>x.id==="05");if(d){d.sec.push({"h":"中断手牌存档","li":["只取号、尚未开手：编号不回收，可以跳号；不写入玩家记录，后台留取消日志。","已发牌或已投注：玩家离开或断线后，由系统代打到结束，按原编号存最终记录（PM 定案，2021-03-29）。","Demo 简化：中断期间按“系统代打（弃牌）”结算，已投入的筹码不退回。"]});}}
+
+;{const d=window.PRD_DOCS.find(x=>x.id==="06");if(d){d.sec.push({"h":"牌局管理权限（R30-UI-72）","li":["俱乐部创建者与管理员不可暂停牌桌；现金桌“请玩家离桌”“解散牌局”保留，本手结束后生效。","赛事只能在开赛前取消，开赛后按钮停用并说明“赛事已开赛，无法取消”；开赛前取消按既定规则全额退报名费与服务费，门票退回（PM 定案，2021-03-29）。"]});}}
+;(()=>{/* R31-DLR-01～04：荷官台本轮新定案（16 第 13 节） */const d=window.PRD_DOCS.find(x=>x.id==='16');if(d&&d.sec)d.sec.push({h:'13. 荷官台本轮新定案（2026-10-21）',li:["本节为本轮新定案（2026-10-21），不代表硬件已实现；Demo 以模拟识别、模拟玩家演示。", "删除“玩家手机（模拟）”与所有代替玩家的操作（弃牌、跟注、全押、加注到、提交加注）；荷官台不显示玩家底牌，也没有任何玩家视角画面。", "行动阶段右侧只显示“等待座位 N 在手机行动”与倒数；Demo 由系统替模拟玩家在倒数内行动，偶有超时，结果即时生效，座位旁只读显示动作。", "底牌由设备识别并绑定到正确座位，荷官端不显示牌面；荷官只按“确认底牌已发出”，表示实体牌已发出，不等于读取成功。读取结果出现缺失、重复或座位不符时一律不得进入下注，只能重扫，或暂停并呼叫督导；不得随意补牌。Demo 画面标示“模拟识别”。", "公共牌照旧由荷官录入或扫描；底牌发出时已由发牌靴扫描、系统已知，录入公共牌时已发出的底牌一律停用、不可选（只停用、不标座位，外观同已用牌，不显示牌面）。", "系统按摊牌规则亮牌：只有进入摊牌且未弃牌者亮牌，弃牌者底牌不自动公开。", "暂停时玩家端只显示“牌局暂停中”。", "荷官保留：开桌、公共牌录牌与扫描、烧牌、进入下一圈、结算确认、交接、呼叫督导。", "只用于公共牌。点“手动输入”后先出现 5 个单选：扫描设备未接入或离线／读数失败（已重试 2 次）／牌面污损或反光／牌靴卡牌／其他；选定后才切到手动。", "选“其他”时展开输入框，限 1～50 字。原因写入操作流水，并随牌局归档进入总后台记录；中英双语。", "荷官台以 100vh／100dvh 的 flex 版面呈现，整页不卷动；牌桌区按可用宽高等比缩放，座位、公共牌、直播示意一起缩放。", "右侧面板独立卷动；开始新局、确认牌面、进入下一圈、确认结算等关键按钮吸底常驻，呼叫督导固定在顶栏。", "演示工具为独立侧栏，与前台 WAP 导览面板同一套样式，只在勾选“显示演示按钮”时出现，不放在荷官操作区。", "分四块：身份（荷官／接班荷官／主管）；目前画面（当前阶段与本 PRD 相关章节摘要）；情境触发（模拟玩家入座／离座、玩家超时、底牌识别缺失／重复／座位不符、公共牌扫描失败、设备离线、断线、班次到点、班次取消、跨午夜）；快速前往（开桌前、发底牌、各街、摊牌结算、等待接班）。", "顶栏说明：演示版：模拟识别与模拟玩家，不与前台连动。"]});})();
+;(()=>{/* R32-DLR-03：固定 6 人桌 */const d=window.PRD_DOCS.find(x=>x.id==='16');if(d&&d.sec)d.sec.push({h:'13.5 固定 6 人桌（R32-DLR-03）',li:['真人荷官桌一律为 6 人桌，座位固定 1～6 号，取代 2～9 人设计。','座位位置与编号固定；空位显示空座框与编号；入座或离座时其他座位不重排，入座补最小空座号。','庄位、盲位按固定座号顺时针轮转并跳过空座；流水与记录用固定座号。','演示入座上限 6 人，满座提示与判断同一口径（在座 N / 6）。','旧可变座位存档迁移为 6 座（超过 6 人只保留前 6 座）。旧存档一律以 6 人桌显示（PM 定案，2021-03-29）。']});})();
+
+</script>
+<script>
+(function(){
+  var D=window.PRD_DOCS,E=window.PRD_ERRORS;
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function table(t){var h='<div class="tw"><table><thead><tr>'+t[0].map(function(c){return'<th>'+esc(c)+'</th>'}).join('')+'</tr></thead><tbody>';
+    for(var i=1;i<t.length;i++)h+='<tr>'+t[i].map(function(c){return'<td>'+esc(c)+'</td>'}).join('')+'</tr>';return h+'</tbody></table></div>'}
+  var cats=[];E.forEach(function(e){if(cats.indexOf(e[1])<0)cats.push(e[1])});
+  function errBlock(){return '<div class="ef" id="ef"><button class="on" data-c="">全部</button>'+cats.map(function(c){return'<button data-c="'+esc(c)+'">'+esc(c.replace(/（.*/,''))+'</button>'}).join('')+'<input id="eq" placeholder="筛选编号或文案"></div><div class="ecnt" id="ecnt"></div><div class="tw err"><table><thead><tr><th>编号</th><th>分类</th><th>文案</th><th>前端处理</th><th>按钮 / 跳转</th></tr></thead><tbody id="ebody">'+
+    E.map(function(e){return'<tr data-c="'+esc(e[1])+'"><td>'+e[0]+'</td><td><span class="tag">'+esc(e[1].replace(/（.*/,''))+'</span></td><td>'+esc(e[2])+'</td><td>'+esc(e[3])+'</td><td>'+esc(e[4])+'</td></tr>'}).join('')+'</tbody></table></div>'}
+  var html='<div class="intro" id="intro"><h2>德州扑克 WAP 产品需求文档（摘要）</h2><p>本页汇整 PRD 00～16 的文档目的、核心规则与关键表格，供面试官与合作方快速了解产品规格。金额均为 USDT 等值，数值可于后台调整。</p><div class="stats"><div><b>'+D.length+'</b><span>份文档</span></div><div><b>'+D.reduce(function(a,d){return a+d.sec.length},0)+'</b><span>个章节</span></div><div><b>'+E.length+'</b><span>个错误码</span></div><div><b>3</b><span>套后台</span></div></div></div>';
+  var toc='<div class="tt">文档目录</div>';
+  D.forEach(function(d){
+    html+='<section class="doc" id="d'+d.id+'"><div class="dh"><span class="no">'+d.id+'</span><h2>'+esc(d.title)+'</h2></div><div class="pp"><b>文档目的：</b>'+esc(d.purpose)+'</div>';
+    toc+='<div class="grp" data-id="'+d.id+'"><button class="d" data-id="'+d.id+'"><span class="n">'+d.id+'</span>'+esc(d.title)+'<span class="ar">▶</span></button><div class="subs">';
+    d.sec.forEach(function(s,i){var sid='d'+d.id+'-'+i;
+      toc+='<a href="#'+sid+'" data-s="'+sid+'">'+esc(s.h)+'</a>';
+      html+='<div class="sec" id="'+sid+'"><h3>'+esc(s.h)+'</h3>';
+      if(s.p)html+='<p>'+esc(s.p)+'</p>';
+      if(s.t)html+=table(s.t);
+      if(s.li)html+='<ul>'+s.li.map(function(x){return x.indexOf('## ')===0?'<li class="lg">'+esc(x.slice(3))+'</li>':'<li>'+esc(x)+'</li>'}).join('')+'</ul>';
+      if(s.note)html+='<div class="note">注：'+esc(s.note)+'</div>';
+      if(s.errors)html+=errBlock();
+      html+='</div>';});
+    toc+='</div></div>';html+='</section>';});
+  html+='<div class="empty" id="empty">没有找到相关内容，换个关键字试试</div><div class="foot">内容依 PRD 00～16 整理，完整规格以正式文档为准</div>';
+  var body=document.getElementById('body'),tocEl=document.getElementById('toc'),prd=document.getElementById('prd'),main=document.getElementById('main');
+  body.innerHTML=html;tocEl.innerHTML=toc;
+  var mobile=function(){return window.matchMedia('(max-width:860px)').matches};
+  function go(el){if(!el)return;el.scrollIntoView({block:'start'});prd.classList.remove('drawer')}
+  tocEl.addEventListener('click',function(ev){var b=ev.target.closest('.d');var a=ev.target.closest('a');
+    if(a){ev.preventDefault();go(document.getElementById(a.getAttribute('data-s')));return}
+    if(b){var g=b.parentNode;var wasOn=b.classList.contains('on');g.classList.toggle('open',!(wasOn&&g.classList.contains('open')));go(document.getElementById('d'+b.getAttribute('data-id')));}});
+  document.getElementById('menuBtn').onclick=function(){prd.classList.add('drawer')};
+  document.getElementById('mask').onclick=function(){prd.classList.remove('drawer')};
+  // 目录高亮
+  var docs=[].slice.call(body.querySelectorAll('.doc'));
+  function spy(){var top=mobile()?130:90,cur=null;docs.forEach(function(d){if(!d.classList.contains('hide')&&d.getBoundingClientRect().top<top+40)cur=d});if(!cur)cur=docs.filter(function(d){return!d.classList.contains('hide')})[0];
+    [].forEach.call(tocEl.querySelectorAll('.d'),function(b){b.classList.toggle('on',cur&&('d'+b.getAttribute('data-id'))===cur.id)})}
+  main.addEventListener('scroll',spy);window.addEventListener('scroll',spy);spy();
+  // 错误码表筛选
+  var ecat='',eq='';var rows=[].slice.call(document.querySelectorAll('#ebody tr'));
+  function efilter(){var n=0;rows.forEach(function(r){var ok=(!ecat||r.getAttribute('data-c')===ecat)&&(!eq||r.textContent.toLowerCase().indexOf(eq)>=0);r.style.display=ok?'':'none';if(ok)n++});document.getElementById('ecnt').textContent='共 '+n+' 条';return n}
+  document.getElementById('ef').addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b)return;ecat=b.getAttribute('data-c');[].forEach.call(this.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});efilter()});
+  document.getElementById('eq').addEventListener('input',function(){eq=this.value.trim().toLowerCase();efilter()});
+  efilter();
+  // 全文搜索 + 高亮
+  var orig=new Map();
+  [].forEach.call(body.querySelectorAll('.sec'),function(s){orig.set(s,s.innerHTML)});
+  var origIntro=document.getElementById('intro');
+  function hl(node,re){if(node.nodeType===3){var t=node.nodeValue;if(!re.test(t))return;re.lastIndex=0;var f=document.createDocumentFragment(),last=0,m;
+      while((m=re.exec(t))){f.appendChild(document.createTextNode(t.slice(last,m.index)));var k=document.createElement('mark');k.textContent=m[0];f.appendChild(k);last=m.index+m[0].length}
+      f.appendChild(document.createTextNode(t.slice(last)));node.parentNode.replaceChild(f,node);return}
+    if(node.nodeType===1&&!/^(INPUT|BUTTON|MARK)$/.test(node.tagName))[].slice.call(node.childNodes).forEach(function(c){hl(c,re)})}
+  var timer;
+  function search(){var q=document.getElementById('q').value.trim();document.getElementById('sbox').classList.toggle('has',!!q);
+    var re=q?new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'):null,secHit=0,docHit=0;
+    orig.forEach(function(h,s){s.innerHTML=h});
+    // 重新绑定错误码表（innerHTML 重建）
+    rows=[].slice.call(document.querySelectorAll('#ebody tr'));bindErr();
+    docs.forEach(function(d){var id=d.id.slice(1),title=d.querySelector('.dh').textContent+d.querySelector('.pp').textContent;var titleHit=re&&re.test(title);if(re)re.lastIndex=0;var any=false;
+      [].forEach.call(d.querySelectorAll('.sec'),function(s){var hit=!re||titleHit||s.textContent.toLowerCase().indexOf(q.toLowerCase())>=0;s.classList.toggle('hide',!hit);if(hit&&re&&!titleHit)secHit++;if(hit)any=true;
+        if(re&&hit){if(s.querySelector('#ebody')){eq=q.toLowerCase();var inp=s.querySelector('#eq');inp.value=q;efilter();if(!s.querySelector('#ebody tr:not([style*="none"])')){eq='';inp.value='';efilter()}}hl(s,re)}});
+      if(re&&titleHit){hl(d.querySelector('.dh'),re)}
+      d.classList.toggle('hide',!any);if(any)docHit++;
+      var g=tocEl.querySelector('.grp[data-id="'+id+'"]');g.classList.toggle('hide',!any);g.classList.toggle('open',!!re&&any);
+      [].forEach.call(g.querySelectorAll('.subs a'),function(a){var s=document.getElementById(a.getAttribute('data-s'));a.style.display=s.classList.contains('hide')?'none':''})});
+    origIntro.style.display=re?'none':'';
+    document.getElementById('empty').style.display=re&&!docHit?'block':'none';
+    document.getElementById('hint').textContent=re?(docHit?'找到 '+docHit+' 份文档':'无结果'):'';
+    if(re){var f=body.querySelector('mark');if(f)f.scrollIntoView({block:'center'})}else main.scrollTop=0;spy()}
+  function bindErr(){var ef=document.getElementById('ef');ef.onclick=function(ev){var b=ev.target.closest('button');if(!b)return;ecat=b.getAttribute('data-c');[].forEach.call(ef.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});efilter()};
+    document.getElementById('eq').oninput=function(){eq=this.value.trim().toLowerCase();efilter()};ecat='';eq='';efilter()}
+  document.getElementById('q').addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(search,150)});
+  document.getElementById('qx').onclick=function(){document.getElementById('q').value='';search()};
+  try{var sg=document.querySelector(".topbar .seg");if(mobile())sg.scrollLeft=sg.scrollWidth}catch(e){}
+  var p=new URLSearchParams(location.search).get('q');if(p){document.getElementById('q').value=p;search()}
+})();
+</script>
+</body>
+</html>
