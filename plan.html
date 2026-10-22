@@ -284,7 +284,7 @@ th{color:var(--muted);font-weight:600;font-size:12px}
     <a href="plan.html"><button class="on">开发计划</button></a>
   </div>
   <span class="sp"></span>
-  <span class="note">2021 年项目计划示范 · 范围以 PRD 00～15 与 Demo 为准</span>
+  <span class="note">2025 年项目计划示范 · 范围以 PRD 00～15 与 Demo 为准</span>
 </div>
 <header>
   <h1>德州扑克 WAP 开发计划</h1>
@@ -432,10 +432,10 @@ th{color:var(--muted);font-weight:600;font-size:12px}
     <div class="ipd-flow">
       <div class="ipd-ph"><b>① 概念</b>市场与可行性<span class="sp">Sprint 0 前</span><span class="dcp">CDCP 立项</span></div>
       <div class="ipd-ph"><b>② 计划</b>路线图、人力、风险<span class="sp">Sprint 0，01-04~01-08</span><span class="dcp">PDCP 计划</span></div>
-      <div class="ipd-ph"><b>③ 开发</b>Scrum 双周迭代<span class="sp">S1~S5，01-11~03-19</span><span class="dcp">TR 技术评审</span></div>
-      <div class="ipd-ph"><b>④ 验证</b>回归、压测、安全、GLI-19<span class="sp">上线前测试，03-22~03-26</span><span class="dcp">TR5</span></div>
-      <div class="ipd-ph"><b>⑤ 发布</b>上线决策<span class="sp">MVP 上线，03-29</span><span class="dcp">ADCP 上市</span></div>
-      <div class="ipd-ph"><b>⑥ 生命周期</b>持续迭代<span class="sp">迭代 1~5，03-29~06-04</span></div>
+      <div class="ipd-ph"><b>③ 开发</b>Scrum 双周迭代<span class="sp">S1~S5，01-11~01-05</span><span class="dcp">TR 技术评审</span></div>
+      <div class="ipd-ph"><b>④ 验证</b>回归、压测、安全、GLI-19<span class="sp">上线前测试，01-08~01-12</span><span class="dcp">TR5</span></div>
+      <div class="ipd-ph"><b>⑤ 发布</b>上线决策<span class="sp">MVP 上线，01-15</span><span class="dcp">ADCP 上市</span></div>
+      <div class="ipd-ph"><b>⑥ 生命周期</b>持续迭代<span class="sp">迭代 1~5，01-15~06-04</span></div>
     </div>
   </div>
 
@@ -448,14 +448,14 @@ th{color:var(--muted);font-weight:600;font-size:12px}
         <tr><td><b>PDCP</b><br>计划</td><td>路线图、人力、关键依赖、风险矩阵</td><td>PM、各职能负责人、财务</td><td>MVP 范围冻结、关键风险有应对</td><td><span class="ipd-res">有条件通过</span><br>支付通道尚未签约。条件：同时洽谈两家以上通道，先以沙箱联调，签约状态于每次 Sprint 评审追踪</td></tr>
         <tr><td><b>TR</b><br>技术评审</td><td>架构、接口、数据一致性、性能</td><td>技术负责人、BE、GS、QA</td><td>核心流程跑通、无阻断缺陷</td><td><span class="ipd-res">发现问题</span><br>S3 评审发现抽水结算与钱包流水对账不平。处置：增加流水对账与每日自动核对，修复列为下个 Sprint 最高优先级，复审通过后才进入验证</td></tr>
         <tr><td><b>TR5</b><br>验证</td><td>回归、压测、安全、GLI-19 送测</td><td>QA、OPS、PM</td><td>P0 / P1 缺陷清零、压测达标</td><td><span class="ipd-res ok">通过</span><br>高风险缺陷全部修复；剩余低风险缺陷登记列表</td></tr>
-        <tr><td><b>ADCP</b><br>上市</td><td>质量、回滚方案、运营与客服准备</td><td>业务负责人、PM、OPS、客服</td><td>无高风险缺陷、回滚方案就绪</td><td><span class="ipd-res">带已知问题上线</span><br>低风险缺陷移入迭代 1，并告知客服；03-29 如期上线</td></tr>
+        <tr><td><b>ADCP</b><br>上市</td><td>质量、回滚方案、运营与客服准备</td><td>业务负责人、PM、OPS、客服</td><td>无高风险缺陷、回滚方案就绪</td><td><span class="ipd-res">带已知问题上线</span><br>低风险缺陷移入迭代 1，并告知客服；01-15 如期上线</td></tr>
       </tbody>
     </table>
   </div>
 
 </section>
 
-<section id="backend-spec"><div class="card"><h2>真人荷官重构 · 2021-03-29</h2><p>本地 Demo 已实现；正式 WAP、视频、服务端权限与 WS 待接入。测试结果见 QA LIVE-DLR。</p><details><summary>12.1 职责迁移与菜单</summary><div style="white-space:pre-wrap;overflow-wrap:anywhere;padding:12px">
+<section id="backend-spec"><div class="card"><h2>真人荷官重构 · 2025-01-15</h2><p>本地 Demo 已实现；正式 WAP、视频、服务端权限与 WS 待接入。测试结果见 QA LIVE-DLR。</p><details><summary>12.1 职责迁移与菜单</summary><div style="white-space:pre-wrap;overflow-wrap:anywhere;padding:12px">
 | 原功能 | 新入口 | 迁移要求 |
 | --- | --- | --- |
 | 派牌后台牌局记录与查询 | 总后台 → 用户与合规 → 记录查询 → 全桌牌局记录 | 保留原电子牌局、逐街回放、结算及历史；增加真人来源、荷官和终止状态；原用户七类记录不改名 |
@@ -477,7 +477,7 @@ th{color:var(--muted);font-weight:600;font-size:12px}
 | 阶段 | 荷官操作 | 系统校验与玩家展示 |
 | --- | --- | --- |
 | 开桌 | 选桌、人数，确认牌具／座位／设备 | 一人一桌；显示规则与模拟带入；已有负责荷官不能抢占 |
-| 开手 | 点击开始本手 | 至少两名有筹码玩家，系统轮转庄位、下盲注、生成唯一手牌编号（真人桌 T + 8 位 Demo 日期 + 4 码，如 T202103290001；电子桌 H 开头） |
+| 开手 | 点击开始本手 | 至少两名有筹码玩家，系统轮转庄位、下盲注、生成唯一手牌编号（真人桌 T + 8 位 Demo 日期 + 4 码，如 T202501150001；电子桌 H 开头） |
 | 录底牌 | 按庄位左侧起逐轮录入，按当前目标座位提示点击牌面 | 共 2×参与人数；重复牌禁选，未满不能确认；确认前可撤销最后一张 |
 | 确认发牌 | 核对本批实际牌面，再点击确认 | 已确认牌不可由荷官改写；保留确认事件；此时才开启玩家行动倒数 |
 | 玩家行动 | 等待手机事件，查看行动人与动作后确认 | 按行动序、合法金额、最小加注、全押资格校验；收到后停止玩家倒数，等待确认 |
@@ -530,21 +530,21 @@ Demo 的主管可选择：①核查无误恢复原状态；②更正纯录入错
 
 <script>
 try{var sg=document.querySelector(".topbar .seg");if(innerWidth<=860)sg.scrollLeft=sg.scrollWidth}catch(e){}
-const TODAY = '2021-03-29'; // R5-PLN-04：模拟 2021-01-04～03-29 开发，模拟日为 MVP 上线日
+const TODAY = '2025-01-15'; // R5-PLN-04：模拟 2024-10-23～01-15 开发，模拟日为 MVP 上线日
 
 const SPRINTS = [
-  {id:'S0', name:'Sprint 0', start:'2021-01-04', end:'2021-01-08', type:'s0', goal:'架构、设计规范、环境、CI/CD'},
-  {id:'S1', name:'S1', start:'2021-01-11', end:'2021-01-22', type:'mvp', goal:'账号、前台框架、总后台框架'},
-  {id:'S2', name:'S2', start:'2021-01-25', end:'2021-02-05', type:'mvp', goal:'钱包、KYC、牌局服务核心'},
-  {id:'S3', name:'S3', start:'2021-02-08', end:'2021-02-19', type:'mvp', goal:'现金桌、提现与审核、同 IP / GPS'},
-  {id:'S4', name:'S4', start:'2021-02-22', end:'2021-03-05', type:'mvp', goal:'新人局、MTT、后台牌桌与赛事配置、首页、消息中心、添加到桌面'},
-  {id:'S5', name:'S5', start:'2021-03-08', end:'2021-03-19', type:'mvp', goal:'SNG、后台审核与对账、风控、防沉迷设置、派牌管理后台、埋点'},
-  {id:'T',  name:'上线前测试', start:'2021-03-22', end:'2021-03-26', type:'test', goal:'回归、压测、安全测试'},
-  {id:'I1', name:'迭代 1', start:'2021-03-29', end:'2021-04-09', type:'iter', goal:'俱乐部、私人桌、分成、代理后台'},
-  {id:'I2', name:'迭代 2', start:'2021-04-12', end:'2021-04-23', type:'iter', goal:'AoF；PLO4 / PLO5 / 6+ 短牌（先显示“即将开放”）、Jackpot、兑现、多次发牌'},
-  {id:'I3', name:'迭代 3', start:'2021-04-26', end:'2021-05-07', type:'iter', goal:'商城、VIP、通行密钥、第三方登录'},
-  {id:'I4', name:'迭代 4', start:'2021-05-10', end:'2021-05-21', type:'iter', goal:'赏金赛、卫星赛、多阶段赛事（先显示“即将开放”）'},
-  {id:'I5', name:'迭代 5', start:'2021-05-24', end:'2021-06-04', type:'iter', goal:'包网商户、客制化模块、观战聊天'},
+  {id:'S0', name:'Sprint 0', start:'2024-10-23', end:'2024-10-27', type:'s0', goal:'架构、设计规范、环境、CI/CD'},
+  {id:'S1', name:'S1', start:'2024-10-30', end:'2024-11-10', type:'mvp', goal:'账号、前台框架、总后台框架'},
+  {id:'S2', name:'S2', start:'2024-11-13', end:'2024-11-24', type:'mvp', goal:'钱包、KYC、牌局服务核心'},
+  {id:'S3', name:'S3', start:'2024-11-27', end:'2024-12-08', type:'mvp', goal:'现金桌、提现与审核、同 IP / GPS'},
+  {id:'S4', name:'S4', start:'2024-12-11', end:'2024-12-22', type:'mvp', goal:'新人局、MTT、后台牌桌与赛事配置、首页、消息中心、添加到桌面'},
+  {id:'S5', name:'S5', start:'2024-12-25', end:'2025-01-05', type:'mvp', goal:'SNG、后台审核与对账、风控、防沉迷设置、派牌管理后台、埋点'},
+  {id:'T',  name:'上线前测试', start:'2025-01-08', end:'2025-01-12', type:'test', goal:'回归、压测、安全测试'},
+  {id:'I1', name:'迭代 1', start:'2025-01-15', end:'2025-01-26', type:'iter', goal:'俱乐部、私人桌、分成、代理后台'},
+  {id:'I2', name:'迭代 2', start:'2025-01-29', end:'2025-02-09', type:'iter', goal:'AoF；PLO4 / PLO5 / 6+ 短牌（先显示“即将开放”）、Jackpot、兑现、多次发牌'},
+  {id:'I3', name:'迭代 3', start:'2025-02-12', end:'2025-02-23', type:'iter', goal:'商城、VIP、通行密钥、第三方登录'},
+  {id:'I4', name:'迭代 4', start:'2025-02-26', end:'2025-03-09', type:'iter', goal:'赏金赛、卫星赛、多阶段赛事（先显示“即将开放”）'},
+  {id:'I5', name:'迭代 5', start:'2025-03-12', end:'2025-03-23', type:'iter', goal:'包网商户、客制化模块、观战聊天'},
 ];
 
 const EPICS = {
@@ -760,7 +760,7 @@ const sum = arr => arr.reduce((a,b)=>a+b,0);
   const mvp = ISSUES.filter(i=>['S0','S1','S2','S3','S4','S5','T'].includes(i.sprint));
   const rows = [
     ['目标','12 周上线 MVP，之后以 5 个迭代补齐功能'],
-    ['时间','2021-01-04 – 2021-06-04；MVP 上线 2021-03-29'],
+    ['时间','2024-10-23 – 2025-03-23；MVP 上线 2025-01-15'],
     ['MVP 范围','账号、钱包、新人局、官方现金桌 NLH、官方 MTT / SNG、总后台基础、风控基础'],
     ['上线后迭代',SPRINTS.filter(s=>s.type==='iter').map(s=>`${s.name}：${s.goal}`).join('<br>')],
     ['方法','Scrum，两周一个迭代；Jira 管理需求与缺陷'],
@@ -803,7 +803,7 @@ const LABELS = {
 };
 const DEPT = {PM:'产品',UI:'UI 设计',FE:'前端',BE:'后端',GS:'牌局服务',QA:'测试',OPS:'运维'};
 (function(){
-  const start='2021-01-04', end='2021-06-06';
+  const start='2024-10-23', end='2025-03-25';
   const weeks = Math.ceil((days(start,end)+1)/7);
   const g = document.getElementById('gantt');
   g.style.setProperty('--weeks', weeks);
@@ -848,15 +848,15 @@ const DEPT = {PM:'产品',UI:'UI 设计',FE:'前端',BE:'后端',GS:'牌局服�
   });
 
   const ms = [
-    ['2021-01-08','Sprint 0 完成','架构、设计规范、环境就绪'],
-    ['2021-02-05','钱包与牌局服务核心完成','可以充值，NLH 引擎可运行'],
-    ['2021-03-19','MVP 功能完成','进入上线前测试'],
-    ['2021-03-29','MVP 上线','账号、钱包、新人局、官方现金桌 NLH、官方 MTT / SNG、总后台基础、风控基础'],
-    ['2021-04-09','迭代 1 上线','俱乐部、私人桌、分成、代理后台'],
-    ['2021-04-23','迭代 2 上线','AoF；PLO4 / PLO5 / 6+ 短牌（先显示“即将开放”）、Jackpot、兑现、多次发牌'],
-    ['2021-05-07','迭代 3 上线','商城、VIP、通行密钥、第三方登录'],
-    ['2021-05-21','迭代 4 上线','赏金赛、卫星赛、多阶段赛事（先显示“即将开放”）'],
-    ['2021-06-04','迭代 5 上线','包网商户、客制化模块、观战聊天'],
+    ['2024-10-27','Sprint 0 完成','架构、设计规范、环境就绪'],
+    ['2024-11-24','钱包与牌局服务核心完成','可以充值，NLH 引擎可运行'],
+    ['2025-01-05','MVP 功能完成','进入上线前测试'],
+    ['2025-01-15','MVP 上线','账号、钱包、新人局、官方现金桌 NLH、官方 MTT / SNG、总后台基础、风控基础'],
+    ['2025-01-26','迭代 1 上线','俱乐部、私人桌、分成、代理后台'],
+    ['2025-02-09','迭代 2 上线','AoF；PLO4 / PLO5 / 6+ 短牌（先显示“即将开放”）、Jackpot、兑现、多次发牌'],
+    ['2025-02-23','迭代 3 上线','商城、VIP、通行密钥、第三方登录'],
+    ['2025-03-09','迭代 4 上线','赏金赛、卫星赛、多阶段赛事（先显示“即将开放”）'],
+    ['2025-03-23','迭代 5 上线','包网商户、客制化模块、观战聊天'],
   ];
   document.getElementById('milestones').innerHTML = ms.map(m=>`<tr><td style="white-space:nowrap">${m[0]}</td><td><b>${m[1]}</b></td><td>${m[2]}</td></tr>`).join('');
 })();
@@ -991,29 +991,29 @@ addEventListener('resize',markScroll);document.querySelectorAll('#tabs button').
 
 /* risks */
 const RISKS = [
-  ['支付通道签约延误','high','S2 充值无法联调，影响 MVP 上线','Sprint 0 起同时洽谈两家以上通道；先用沙箱联调','PM / 财务','2021-01-22'],
-  ['KYC 服务商签约延误','high','第一次提现前无法实名，影响提现','先接一家服务商；保留人工审核作为备援','PM','2021-01-22'],
-  ['发牌随机数认证周期','high','未取得认证无法上线','S2 完成发牌模块后立即送测','后端 / PM','2021-03-19'],
-  ['首站市场与牌照未定','high','支付渠道、语言、地区封锁无法定案','站点模板化，先以通用站点开发','PM / 法务','2021-03-04'],
-  ['牌局服务稳定性与并发','mid','牌桌卡顿、结算错误','S3 起每迭代做压测；上线前完整压测','牌局服务 / 运维','2021-03-26'],
-  ['WebSocket 断线与重连','mid','手机网络不稳导致误判暂离','断线重连状态同步（见 15 第 7 节）；超时规则依 00 第 4.2 节','牌局服务 / 前端','2021-02-19'],
-  ['iOS 添加到桌面限制','low','桌面图标安装率偏低','图示教学与箭头引导（01 第 7.1 节）','前端','2021-03-04'],
-  ['GPS 授权率','mid','不授权不能入座，影响现金桌转化','入座前说明用途；追踪授权率（12）','PM','2021-02-19'],
+  ['支付通道签约延误','high','S2 充值无法联调，影响 MVP 上线','Sprint 0 起同时洽谈两家以上通道；先用沙箱联调','PM / 财务','2024-11-10'],
+  ['KYC 服务商签约延误','high','第一次提现前无法实名，影响提现','先接一家服务商；保留人工审核作为备援','PM','2024-11-10'],
+  ['发牌随机数认证周期','high','未取得认证无法上线','S2 完成发牌模块后立即送测','后端 / PM','2025-01-05'],
+  ['首站市场与牌照未定','high','支付渠道、语言、地区封锁无法定案','站点模板化，先以通用站点开发','PM / 法务','2024-12-21'],
+  ['牌局服务稳定性与并发','mid','牌桌卡顿、结算错误','S3 起每迭代做压测；上线前完整压测','牌局服务 / 运维','2025-01-12'],
+  ['WebSocket 断线与重连','mid','手机网络不稳导致误判暂离','断线重连状态同步（见 15 第 7 节）；超时规则依 00 第 4.2 节','牌局服务 / 前端','2024-12-08'],
+  ['iOS 添加到桌面限制','low','桌面图标安装率偏低','图示教学与箭头引导（01 第 7.1 节）','前端','2024-12-21'],
+  ['GPS 授权率','mid','不授权不能入座，影响现金桌转化','入座前说明用途；追踪授权率（12）','PM','2024-12-08'],
   ['原型待补画面','mid','开发等待设计','每迭代前一周完成下一迭代原型','UI / PM','每迭代'],
-  ['农历春节假期','mid','S3 产能下降','提前排定值班与假期，迭代点数下调','PM','2021-02-02'],
+  ['农历春节假期','mid','S3 产能下降','提前排定值班与假期，迭代点数下调','PM','2024-11-21'],
 ];
 const LV = {high:['高','lv-high'],mid:['中','lv-mid'],low:['低','lv-low']};
 document.getElementById('riskBody').innerHTML = RISKS.map(r=>`<tr><td>${r[0]}</td><td><span class="tag ${LV[r[1]][1]}">${LV[r[1]][0]}</span></td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('');
 
 const DEPS = [
-  ['支付通道合约（银行转账、三方支付、USDT）','2021-01-22','S2','已签约'],
-  ['KYC 服务商合约','2021-01-22','S2','已签约'],
-  ['发牌随机数认证（GLI 或 iTech Labs）','2021-03-19','上线','已完成'],
-  ['汇率服务商','2021-01-22','S2','已签约'],
-  ['首站市场与牌照（法务意见）','2021-03-04','上线','已完成'],
-  ['原型补齐：登录页、钱包 USDT、首页胶囊补齐玩法、底部导航 5 项、消息中心','2021-01-18','S1～S4','已完成'],
-  ['USDT 上限检查接上充值上限（S2 先留接口）','2021-03-19','S5','已完成'],
-  ['原型补齐：商城、我的道具','2021-04-19','迭代 3','未开始'],
+  ['支付通道合约（银行转账、三方支付、USDT）','2024-11-10','S2','已签约'],
+  ['KYC 服务商合约','2024-11-10','S2','已签约'],
+  ['发牌随机数认证（GLI 或 iTech Labs）','2025-01-05','上线','已完成'],
+  ['汇率服务商','2024-11-10','S2','已签约'],
+  ['首站市场与牌照（法务意见）','2024-12-21','上线','已完成'],
+  ['原型补齐：登录页、钱包 USDT、首页胶囊补齐玩法、底部导航 5 项、消息中心','2024-11-06','S1～S4','已完成'],
+  ['USDT 上限检查接上充值上限（S2 先留接口）','2025-01-05','S5','已完成'],
+  ['原型补齐：商城、我的道具','2025-02-05','迭代 3','未开始'],
 ];
 document.getElementById('depBody').innerHTML = DEPS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
 
@@ -1188,7 +1188,7 @@ function copyText(btn){
     ['QA 审核','Prompt F 测试用例',1,['F']],
     ['回归测试','Prompt G',1,['G']],
     ['错误码与多语言','Prompt D、I、J',1,['D','I','J']],
-    ['上线（03-29）','Prompt H 发布说明',1,['H']],
+    ['上线（01-15）','Prompt H 发布说明',1,['H']],
   ];
   const fl=document.getElementById('aiFlow');
   fl.innerHTML = steps.map((x,i)=>`${i?'<span class="ar">→</span>':''}<button type="button" class="st ${x[2]?'ai':''}" data-i="${i}"><b>${x[0]}</b><small>${x[1]}</small></button>`).join('')+'<div class="flow-rel" id="flowRel"></div>';
