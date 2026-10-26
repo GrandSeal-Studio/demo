@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flow 协作自动化平台</title>
+<title>项目管理 Workflow 导入</title>
 <style>
 :root{--bg:#fbfbfa;--panel:#fff;--ink:#16181d;--sub:#5b616e;--mute:#8a909c;--line:#e6e6e3;--acc:#1f4fd8;--accbg:#f2f5fd}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1115;--panel:#161920;--ink:#e8e9ec;--sub:#a3a8b3;--mute:#737985;--line:#272a31;--acc:#7aa2ff;--accbg:#1a2133}}
@@ -100,13 +100,13 @@ footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:13px;color
 <body>
 
 <div class="top"><div class="wrap">
-  <span class="name">Flow</span>
+  <span class="name">项目管理 Workflow 导入</span>
   <a href="index.html">返回作品集</a>
 </div></div>
 
 <header class="hero"><div class="wrap">
-  <p class="eyebrow">项目案例 / 内部协作平台</p>
-  <h1>Flow 协作自动化平台</h1>
+  <p class="eyebrow">项目案例 / 团队协作流程改造</p>
+  <h1>项目管理 Workflow 导入</h1>
   <p class="intro">把开发、技术客服、运营三方的协作串成可追溯、可自动通知的闭环。平台保留 Jira 作为任务与缺陷的权威系统，在其上补充自动建单、状态流转、即时通讯推送、AI 代码审查、运营工单审批和知识库问答，并允许成员的本地 AI 助手在授权范围内代为更新 Jira。</p>
   <dl class="meta">
     <div><dt>我的角色</dt><dd>产品经理，独立负责</dd></div>
@@ -124,7 +124,8 @@ footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:13px;color
     <a href="#s4">功能规划</a>
     <a href="#s5">AI 代理设计</a>
     <a href="#s6">研发方式</a>
-    <a href="#s7">岗位匹配</a>
+    <a href="#s7">AI 使用深度</a>
+    <a href="#s8">岗位匹配</a>
   </nav>
 
   <main>
@@ -262,6 +263,25 @@ footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:13px;color
 
     <section id="s7">
       <div class="no">07</div>
+      <h2>AI 使用深度与作品</h2>
+      <p class="desc">我使用 AI 分三个层次：日常提效、把 AI 接进团队研发流程、把 AI 设计成产品功能。</p>
+      <div class="list">
+        <div class="row"><div class="k">第一层<small>个人提效</small></div><div class="v">调研、竞品对比、PRD 初稿、流程图和测试用例都先由 AI 起草，我负责判断、取舍和定稿。例如 Jira 与 Plane 的对比，先让 AI 整理功能清单，再由我本地试用验证结论。</div></div>
+        <div class="row"><div class="k">第二层<small>接入研发流程</small></div><div class="v">为每个仓库编写 AI 的工作规范，通过 MCP 让 AI 只读查询数据库、查技术文档、自己打开浏览器测试页面；配置专门负责代码审查、权限审计的 AI 角色，以及保存时自动检查的规则。需求从 PRD 到设计说明、实施计划、编码、审查、验收，每一步都有 AI 参与，由我把关。</div></div>
+        <div class="row"><div class="k">第三层<small>设计 AI 产品功能</small></div><div class="v">在本平台中设计了三个 AI 场景：本地 AI 代理更新 Jira、合并请求自动 AI 审查、文档知识库问答与一致性核查。设计重点不在模型本身，而在使用边界：谁授权、能做什么、哪些必须人工确认、出了问题如何追溯。</div></div>
+      </div>
+      <h3 style="margin:32px 0 12px">用 AI 完成的作品</h3>
+      <div class="tw"><table>
+        <thead><tr><th>作品</th><th>内容</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>德州扑克产品原型</td><td>玩家端、总后台、代理后台、派牌后台、PRD 文档中心与开发计划，以 AI 生成并完成全站回归测试</td><td><a href="index.html">查看</a> / <a href="prd.html">PRD</a></td></tr>
+        <tr><td>项目管理 Workflow 导入</td><td>本页所述平台：需求文档、后端、前端三个仓库，以 AI 编程助手和 MCP 驱动开发</td><td>本页</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="s8">
+      <div class="no">08</div>
       <h2>与岗位要求的对应</h2>
       <p class="desc">应聘岗位：产品经理（AI / 棋牌）。</p>
       <div class="list">
