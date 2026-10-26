@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow 协作自动化平台</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--sub:#5f6368;--line:#e3e3df;--acc:#4f46e5;--acc2:#0ea5e9;--ok:#16a34a;--warn:#d97706;--soft:#eef0ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111214;--card:#1a1b1e;--ink:#ececec;--sub:#a1a1aa;--line:#2c2d31;--acc:#8b8cf8;--acc2:#38bdf8;--ok:#4ade80;--warn:#fbbf24;--soft:#23244a}}
+:root[data-theme="dark"]{--bg:#111214;--card:#1a1b1e;--ink:#ececec;--sub:#a1a1aa;--line:#2c2d31;--acc:#8b8cf8;--acc2:#38bdf8;--ok:#4ade80;--warn:#fbbf24;--soft:#23244a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:18px;align-items:center;height:52px;overflow-x:auto;white-space:nowrap}
+nav b{margin-right:auto}
+nav a{color:var(--sub);text-decoration:none;font-size:14px}
+nav a:hover{color:var(--acc)}
+header{padding:64px 0 40px}
+.tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:99px;background:var(--soft);color:var(--acc);margin:0 6px 6px 0}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.2;margin:12px 0}
+h2{font-size:24px;margin:0 0 6px}
+h3{font-size:16px;margin:0 0 6px}
+.lead{color:var(--sub);font-size:17px;max-width:760px}
+section{padding:40px 0;border-top:1px solid var(--line)}
+.sec-sub{color:var(--sub);margin:0 0 22px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card p{margin:0;color:var(--sub);font-size:14px}
+.num{font-size:12px;font-weight:700;color:var(--acc);letter-spacing:.05em}
+.stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:30px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:26px}
+.stat span{color:var(--sub);font-size:13px}
+.diagram{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+.diagram svg{min-width:760px;width:100%;height:auto;display:block}
+svg text{fill:var(--ink);font-size:13px}
+svg .s{fill:var(--sub);font-size:11px}
+svg .box{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+svg .hl{fill:var(--soft);stroke:var(--acc);stroke-width:1.5}
+svg .ar{stroke:var(--sub);stroke-width:1.4;fill:none;marker-end:url(#a)}
+svg .ar2{stroke:var(--acc);stroke-width:1.6;fill:none;marker-end:url(#b)}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.steps{counter-reset:s;display:grid;gap:12px}
+.step{display:grid;grid-template-columns:36px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.step:before{counter-increment:s;content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700}
+.step p{margin:0;color:var(--sub);font-size:14px}
+code{font:12.5px/1.4 ui-monospace,Menlo,monospace;background:var(--soft);padding:1px 6px;border-radius:5px}
+.chk{color:var(--ok);font-weight:700}
+.no{color:var(--warn);font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:99px;cursor:pointer;font:inherit;font-size:14px}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.pane{display:none}.pane.on{display:block}
+footer{padding:40px 0 60px;color:var(--sub);font-size:13px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <b>Flow</b>
+  <a href="#pain">痛点</a><a href="#arch">架构</a><a href="#modules">模块</a><a href="#ai">AI 代理</a><a href="#workflow">AI 开发流程</a><a href="#pm">PM 产出</a><a href="#fit">岗位对照</a>
+  <a href="index.html">← 返回 Demo</a>
+</div></nav>
+
+<header class="wrap">
+  <span class="tag">AI 产品</span><span class="tag">MCP</span><span class="tag">Claude Code</span><span class="tag">Jira 集成</span><span class="tag">运营后台</span>
+  <h1>Flow · 开发—技术客服—运营<br>协作自动化平台</h1>
+  <p class="lead">从需求调研、PRD、原型到落地，由我独立规划并用 AI 编程助手 + MCP 驱动开发的内部平台。它不替换 Jira，而是在 Jira 之上做<b>自动化 + 桥接 + RAG</b> 层：需求一键建单、Bug 流转驱动、Telegram 推送、AI 代码审查、运营工单审批、知识库问答，以及让每位成员的本地 AI 助手安全地代为读写 Jira。</p>
+  <div class="stats">
+    <div class="stat"><b>4</b><span>业务模块 + 1 份平台总纲</span></div>
+    <div class="stat"><b>9</b><span>模块 01 下的 feature PRD</span></div>
+    <div class="stat"><b>3</b><span>仓库：doc / 后端 / 前端</span></div>
+    <div class="stat"><b>11</b><span>角色（含「本地 AI 代理」）</span></div>
+  </div>
+</header>
+
+<section id="pain"><div class="wrap">
+  <h2>为什么要做：四类反复出现的协作痛点</h2>
+  <p class="sec-sub">来自团队日常观察与访谈，是平台的需求出发点。</p>
+  <div class="grid">
+    <div class="card"><div class="num">开发协作</div><h3>Jira 变更靠人工转发</h3><p>任务/Bug 有变化，要手工复制链接到群里 @ 对应的人，漏通知、不及时。</p></div>
+    <div class="card"><div class="num">周报</div><h3>周报层层手工汇总</h3><p>每人写 txt 交给整理人，再手工拼成团队周报，重复劳动。</p></div>
+    <div class="card"><div class="num">运营—客服</div><h3>后台操作口头代办</h3><p>改密码、绑 IP 等靠聊天口头请求，无单据、无审批、无留痕。</p></div>
+    <div class="card"><div class="num">文档一致性</div><h3>文档与代码彼此漂移</h3><p>需求、手册、设计文档、代码多轮迭代后不一致，无人核查。</p></div>
+  </div>
+</div></section>
+
+<section id="arch"><div class="wrap">
+  <h2>全局协作流程</h2>
+  <p class="sec-sub">关键产品决策：经 Plane 本地试用（社区版功能不足、商业版超 12 席收费），<b>保留 Jira 作为权威系统</b>，平台只做其上的集成层。</p>
+  <div class="diagram">
+  <svg viewBox="0 0 900 400" role="img" aria-label="全局协作流程图">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#888"/></marker>
+      <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#6366f1"/></marker>
+    </defs>
+    <!-- inputs -->
+    <rect class="box" x="10" y="20" width="160" height="54" rx="10"/><text x="90" y="44" text-anchor="middle">PM 提交需求文档</text><text class="s" x="90" y="62" text-anchor="middle">flow-doc 文档仓</text>
+    <rect class="box" x="10" y="120" width="160" height="54" rx="10"/><text x="90" y="144" text-anchor="middle">开发提交合并请求</text><text class="s" x="90" y="162" text-anchor="middle">Git</text>
+    <rect class="box" x="10" y="220" width="160" height="54" rx="10"/><text x="90" y="244" text-anchor="middle">运营提交后台工单</text><text class="s" x="90" y="262" text-anchor="middle">替代口头代办</text>
+    <rect class="box" x="10" y="320" width="160" height="54" rx="10"/><text x="90" y="344" text-anchor="middle">需求 / 用户手册</text><text class="s" x="90" y="362" text-anchor="middle">知识来源</text>
+    <!-- modules -->
+    <rect class="hl" x="250" y="20" width="200" height="54" rx="10"/><text x="350" y="44" text-anchor="middle">01 开发协作自动化</text><text class="s" x="350" y="62" text-anchor="middle">建单 · Bug 流转 · 周报</text>
+    <rect class="hl" x="250" y="120" width="200" height="54" rx="10"/><text x="350" y="144" text-anchor="middle">02 代码审查自动化</text><text class="s" x="350" y="162" text-anchor="middle">AI 审查报告</text>
+    <rect class="hl" x="250" y="220" width="200" height="54" rx="10"/><text x="350" y="244" text-anchor="middle">03 运营工单与审批</text><text class="s" x="350" y="262" text-anchor="middle">提单→审批→执行→回执</text>
+    <rect class="hl" x="250" y="320" width="200" height="54" rx="10"/><text x="350" y="344" text-anchor="middle">04 知识库问答</text><text class="s" x="350" y="362" text-anchor="middle">RAG · 文档/代码一致性</text>
+    <!-- outputs -->
+    <rect class="box" x="560" y="40" width="150" height="70" rx="10"/><text x="635" y="70" text-anchor="middle">Jira</text><text class="s" x="635" y="90" text-anchor="middle">任务/Bug 权威系统</text>
+    <rect class="box" x="560" y="250" width="150" height="70" rx="10"/><text x="635" y="280" text-anchor="middle">Telegram</text><text class="s" x="635" y="300" text-anchor="middle">@ 对应责任人</text>
+    <rect class="box" x="760" y="140" width="130" height="70" rx="10"/><text x="825" y="170" text-anchor="middle">本地 AI 助手</text><text class="s" x="825" y="190" text-anchor="middle">Claude Code / Codex</text>
+    <!-- arrows -->
+    <path class="ar" d="M170 47H248"/><path class="ar" d="M170 147H248"/><path class="ar" d="M170 247H248"/><path class="ar" d="M170 347H248"/>
+    <path class="ar2" d="M450 40H558"/><text class="s" x="470" y="34">doc→建单</text>
+    <path class="ar" d="M558 92H452"/><text class="s" x="470" y="108">webhook 事件</text>
+    <path class="ar2" d="M450 60C510 60 520 260 558 270"/>
+    <path class="ar2" d="M450 147C510 147 530 270 558 280"/>
+    <path class="ar" d="M450 160C500 160 520 110 558 100"/><text class="s" x="476" y="196">关联工作项</text>
+    <path class="ar2" d="M450 247H558"/>
+    <path class="ar2" d="M450 347C510 347 530 310 558 300"/><text class="s" x="470" y="372">差异自动建 Jira</text>
+    <path class="ar" d="M758 160C735 140 730 100 712 85"/><path class="ar" d="M712 70C740 80 760 120 790 138"/><text class="s" x="720" y="128">MCP 读写</text>
+  </svg>
+  </div>
+</div></section>
+
+<section id="modules"><div class="wrap">
+  <h2>模块与功能拆解</h2>
+  <p class="sec-sub">PRD 按「模块编号.功能编号」体系管理，PRD 只写做什么与验收标准，不写技术实现。</p>
+  <div class="tabs" id="tabs">
+    <button class="on" data-p="m1">01 开发协作</button><button data-p="m2">02 代码审查</button><button data-p="m3">03 运营工单</button><button data-p="m4">04 知识库</button>
+  </div>
+  <div class="pane on" id="m1"><div class="tw"><table>
+    <tr><th>编号</th><th>功能</th><th>解决的问题</th></tr>
+    <tr><td>01.01</td><td>即时通讯账号绑定</td><td>Jira 账号 ↔ Telegram 身份映射，推送才能精准 @ 人</td></tr>
+    <tr><td>01.02</td><td>推送规则与文案模板配置</td><td>运营后台可配置哪些事件推、推给谁、文案怎么写</td></tr>
+    <tr><td>01.03</td><td>Jira 事件推送</td><td>新建 / 状态变更 / 重开 / 临近截止自动通知</td></tr>
+    <tr><td>01.04</td><td>需求文档一键建 Jira 任务</td><td>识别 PRD 中的任务，按端（前/后端）拆单并指派</td></tr>
+    <tr><td>01.05</td><td>Bug 流转驱动</td><td>修复后自动推进到验证环节并通知测试</td></tr>
+    <tr><td>01.06</td><td>即时通讯双向操作</td><td>在 Telegram 里直接改状态、评论</td></tr>
+    <tr><td>01.07</td><td>团队周报自动汇总</td><td>每周定时从 Jira 取数生成周报</td></tr>
+    <tr><td>01.08</td><td>本地 AI 代理读写 Jira</td><td>AI 以成员身份同步 Jira，白名单 + 留痕</td></tr>
+    <tr><td>01.09</td><td>Jira 数据本地副本</td><td>镜像同步，支撑报表、检索与 AI 调用</td></tr>
+  </table></div></div>
+  <div class="pane" id="m2"><div class="card"><h3>代码审查自动化</h3><p>合并请求触发 AI 代码审查 → 生成结构化报告 → 推送到 Telegram，并关联对应 Jira 工作项，让 Reviewer 先看 AI 摘要再决定细看哪里。</p></div></div>
+  <div class="pane" id="m3"><div class="card"><h3>运营工单与审批</h3><p>运营在后台提交操作工单（重置密码、绑定 IP 等）→ 审核人员审批 → 系统自动执行或由技术客服执行 → 回执推送。运营按业务线隔离，全程操作留痕。</p></div></div>
+  <div class="pane" id="m4"><div class="card"><h3>知识库问答与文档一致性</h3><p>把需求文档与用户手册沉淀为可问答知识库（RAG）；定期核查文档与代码的一致性，发现差异自动建 Jira 任务跟踪。</p></div></div>
+</div></section>
+
+<section id="ai"><div class="wrap">
+  <h2>AI 功能设计重点：本地 AI 代理读写 Jira（01.08）</h2>
+  <p class="sec-sub">让 AI 真正替人干活，同时把「越权」这个最大风险设计掉。</p>
+  <div class="steps">
+    <div class="step"><div><h3>成员显式授权</h3><p>在平台「AI 授权管理页」授权；凭证仅本地持有，随时可撤销（离职、换设备即断开）。</p></div></div>
+    <div class="step"><div><h3>AI 读取分配给本人的任务</h3><p>以成员本人 Jira 身份读取，权限永远不超过该成员。</p></div></div>
+    <div class="step"><div><h3>工作完成后生成「事项文档」</h3><p>AI 结构化列出要对哪些工作项做哪些更新（改状态 / 指派 / 评论 / 附件）。</p></div></div>
+    <div class="step"><div><h3>成员逐条勾选确认（Human-in-the-loop）</h3><p>只有确认过的条目才会执行，视同本人操作直接生效。</p></div></div>
+    <div class="step"><div><h3>白名单执行 + 平台留痕</h3><p>日志标识「来源 = 本地 AI 代理 + 实际成员」，可追溯。</p></div></div>
+  </div>
+  <div class="tw" style="margin-top:16px"><table>
+    <tr><th>操作</th><th>AI 可否执行</th></tr>
+    <tr><td>创建 / 改状态 / 指派 / 评论 / 加附件</td><td class="chk">✓ 白名单内</td></tr>
+    <tr><td>关闭 / 删除 / 改工作流</td><td class="no">✕ 仅人工</td></tr>
+  </table></div>
+</div></section>
+
+<section id="workflow"><div class="wrap">
+  <h2>我怎么用 AI + MCP 开发这个项目</h2>
+  <p class="sec-sub">三个仓库都配了 <code>CLAUDE.md</code>、<code>.mcp.json</code> 与 <code>.claude/</code>（agents / skills / hooks），让 AI 编程助手在明确规则下工作。</p>
+  <div class="grid">
+    <div class="card"><div class="num">flow-doc</div><h3>需求与设计文档仓</h3><p>平台总览、9 篇 feature PRD、调研报告、架构决策、功能依赖与开发顺序；spec → plan 两段式交给 AI 执行。</p></div>
+    <div class="card"><div class="num">flow-boss</div><h3>后端 · Hyperf / PHP</h3><p>MCP：<code>mysql</code>（只读，禁止增删改）、<code>context7</code> 查文档。<br>Agents：PHP 审查、权限路由审计、Swoole 安全审查。<br>Skills：新增后台路由、新增错误码。</p></div>
+    <div class="card"><div class="num">flow-boss-vue</div><h3>前端 · Vue 3 + Element Plus</h3><p>MCP：<code>playwright</code> 让 AI 打开浏览器自测、<code>context7</code>。<br>Skills：新建模块、Jira 导入。<br>Hooks：编辑后自动 ESLint、敏感文件保护。</p></div>
+  </div>
+  <div class="steps" style="margin-top:16px">
+    <div class="step"><div><h3>调研 → PRD</h3><p>竞品/工具调研（Jira vs Plane）后写 PRD，用质量检查清单自查，组织评审。</p></div></div>
+    <div class="step"><div><h3>设计 spec → 实施 plan</h3><p>把 PRD 拆成设计规格与分步计划（如列表通用态、标准时间列、系统配置框架等统一规范）。</p></div></div>
+    <div class="step"><div><h3>AI 按规则编码</h3><p>Claude Code 读 CLAUDE.md 与 skills 生成代码，MCP 只读查库核对数据。</p></div></div>
+    <div class="step"><div><h3>AI 审查 + 自动化验收</h3><p>专属 reviewer agent 审查，Playwright 跑 e2e，<code>/review</code> 发现的问题沉淀进 TODOS 排期。</p></div></div>
+  </div>
+</div></section>
+
+<section id="pm"><div class="wrap">
+  <h2>PM 产出物</h2>
+  <div class="grid">
+    <div class="card"><h3>PRD 体系</h3><p>总纲 + 模块 + feature 三级；统一编号、版本、状态；角色/权限矩阵、操作留痕与通知通则。</p></div>
+    <div class="card"><h3>业务流程</h3><p>全局协作流程图、Bug 流转、工单审批、AI 事项文档执行流程。</p></div>
+    <div class="card"><h3>决策记录</h3><p>架构决策（保留 Jira 的方案 A）、PRD 评审邀请、功能依赖与开发顺序。</p></div>
+    <div class="card"><h3>后台规范</h3><p>列表通用态、标准时间列、系统配置框架等跨模块交互规范，保证一致体验。</p></div>
+  </div>
+</div></section>
+
+<section id="fit"><div class="wrap">
+  <h2>与「产品经理（AI / 棋牌）」岗位的对照</h2>
+  <div class="tw"><table>
+    <tr><th>岗位要求</th><th>在本项目中的体现</th></tr>
+    <tr><td>产品功能规划、需求分析、版本迭代</td><td>4 模块 / 9 feature 规划，按依赖排出开发顺序，v1 → v2 路线图</td></tr>
+    <tr><td>AI 智能助手的探索与落地</td><td>本地 AI 代理读写 Jira、AI 代码审查、RAG 知识库问答</td></tr>
+    <tr><td>独立完成原型、流程、需求文档</td><td>平台总览 + feature PRD + 流程图 + 设计 spec，均独立完成</td></tr>
+    <tr><td>竞品分析与体验优化</td><td>Jira / Plane 实测对比后做出架构决策</td></tr>
+    <tr><td>协调开发、测试、UI 推动落地</td><td>按端拆单、Bug 流转驱动、PRD 评审组织</td></tr>
+    <tr><td>加分：复杂业务系统 / 运营后台</td><td>运营工单审批、代理后台与资金体系（同仓另见德州扑克 Demo）</td></tr>
+    <tr><td>加分：棋牌行业</td><td>本站 <a href="index.html">德州扑克 Demo</a>（WAP / 总后台 / 代理后台 / 派牌后台）</td></tr>
+  </table></div>
+</div></section>
+
+<footer><div class="wrap">Flow 协作自动化平台 · 作品集展示页（内容已脱敏，不含内部账号与凭证）</div></footer>
+
+<script>
+document.getElementById('tabs').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  this.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('on',p.id===b.dataset.p)});
+});
+</script>
+</body>
+</html>
